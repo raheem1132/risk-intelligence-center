@@ -28,7 +28,7 @@ Route::post('/login', function (Request $request) {
     return redirect('/dashboard');
 });
 
-// DATA MASTER 247 NEGARA - SUDAH BERSIH DAN AMAN TOTAL LEK
+// DATA MASTER NEGARA GLOBAL - BERSIH TOTAL
 $globalCountriesList = [
     ['name' => 'Afghanistan', 'code' => 'af'], ['name' => 'Albania', 'code' => 'al'], ['name' => 'Algeria', 'code' => 'dz'], 
     ['name' => 'Andorra', 'code' => 'ad'], ['name' => 'Angola', 'code' => 'ao'], ['name' => 'Antigua and Barbuda', 'code' => 'ag'], 
@@ -97,10 +97,28 @@ $globalCountriesList = [
     ['name' => 'Zambia', 'code' => 'zm'], ['name' => 'Zimbabwe', 'code' => 'zw']
 ];
 
-// ROUTE DASHBOARD
+// ROUTE DASHBOARD (GABUNGAN UTUH)
 Route::get('/dashboard', function () use ($globalCountriesList) {
     $dashboardCountries = $globalCountriesList;
     usort($dashboardCountries, function($a, $b) { return strcmp($a['name'], $b['name']); });
+
+    $historyLogs = [
+        [
+            'id' => 'EXP-2026-001', 'carrier' => 'MV Blue Wave Ocean', 
+            'origin' => 'Tanjung Priok (ID)', 'destination' => 'Port of Singapore (SG)', 
+            'tonnage' => '45,000 Tons', 'value' => '$1,250,000', 'status' => 'Archived / Clear'
+        ],
+        [
+            'id' => 'EXP-2026-002', 'carrier' => 'Evergreen Intercept', 
+            'origin' => 'Port of Rotterdam (NL)', 'destination' => 'Shanghai Port (CN)', 
+            'tonnage' => '82,500 Tons', 'value' => '$3,400,000', 'status' => 'Archived / Clear'
+        ],
+        [
+            'id' => 'EXP-2026-003', 'carrier' => 'Pacific Titan', 
+            'origin' => 'Port of LA (US)', 'destination' => 'Tokyo Bay (JP)', 
+            'tonnage' => '61,200 Tons', 'value' => '$2,150,000', 'status' => 'Archived / Clear'
+        ]
+    ];
 
     $htmlContent = "
     @extends(view()->exists('layouts.app') ? 'layouts.app' : (view()->exists('welcome') ? 'welcome' : 'dashboard'))
@@ -142,7 +160,7 @@ Route::get('/dashboard', function () use ($globalCountriesList) {
             </div>
         </div>
 
-        <div class='grid grid-cols-1 lg:grid-cols-5 gap-6'>
+        <div class='grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6'>
             <div class='lg:col-span-2 bg-[#111827] border border-gray-800 rounded-xl p-5 flex flex-col gap-4'>
                 <div>
                     <h3 class='text-sm font-bold text-gray-200 uppercase tracking-wider mb-1'>Comparison Engine</h3>
@@ -189,10 +207,53 @@ Route::get('/dashboard', function () use ($globalCountriesList) {
                 </div>
             </div>
         </div>
+
+        <!-- TABEL LOG RIWAYAT KARGO YANG MENYATU -->
+        <div class='bg-[#111827] border border-gray-800 rounded-xl overflow-hidden shadow-lg'>
+            <div class='bg-gray-900/50 px-4 py-3 border-b border-gray-800 flex justify-between items-center'>
+                <div class='flex items-center gap-2'>
+                    <span class='text-xs text-cyan-400'>🗂️</span>
+                    <span class='text-[11px] uppercase font-bold text-gray-300 tracking-wider'>MANIFEST AUDIT PELAYARAN SELESAI (ARCHIVED LOGS)</span>
+                </div>
+                <span class='text-[9px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 font-mono'>🔒 Data Authenticated</span>
+            </div>
+            <div class='overflow-x-auto'>
+                <table class='w-full text-left border-collapse'>
+                    <thead>
+                        <tr class='border-b border-gray-800 text-[11px] text-gray-400 uppercase tracking-wider bg-gray-900/20'>
+                            <th class='p-4 font-bold'>ID Ekspedisi</th>
+                            <th class='p-4 font-bold'>Nama Kapal / Carrier</th>
+                            <th class='p-4 font-bold'>Pelabuhan Keberangkatan</th>
+                            <th class='p-4 font-bold'>Pelabuhan Tujuan</th>
+                            <th class='p-4 font-bold'>Kargo Tonase</th>
+                            <th class='p-4 font-bold'>Valuasi Finansial</th>
+                            <th class='p-4 font-bold text-center'>Status Pelaporan</th>
+                        </tr>
+                    </thead>
+                    <tbody class='divide-y divide-gray-800/60 text-xs text-gray-300'>
+                        @foreach(\$historyLogs as \$log)
+                            <tr class='hover:bg-gray-900/40 transition'>
+                                <td class='p-4 font-mono font-bold text-gray-400'>{{ \$log['id'] }}</td>
+                                <td class='p-4 font-bold text-white'>{{ \$log['carrier'] }}</td>
+                                <td class='p-4 text-gray-400'>{{ \$log['origin'] }}</td>
+                                <td class='p-4 text-gray-400'>{{ \$log['destination'] }}</td>
+                                <td class='p-4 font-semibold text-emerald-400'>{{ \$log['tonnage'] }}</td>
+                                <td class='p-4 font-bold text-amber-500'>{{ \$log['value'] }}</td>
+                                <td class='p-4 text-center'>
+                                    <span class='px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase'>
+                                        {{ \$log['status'] }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
     @endsection";
 
-    return response(Blade::render($htmlContent, compact('dashboardCountries')));
+    return response(Blade::render($htmlContent, compact('dashboardCountries', 'historyLogs')));
 });
 
 // ROUTE COUNTRIES
@@ -247,24 +308,6 @@ Route::get('/news', function () {
             'summary' => 'Next-generation AI frameworks are shrinking vessel turnaround rates by up to 18%. Terminal operations report significantly optimized container yard stacking.',
             'category' => 'Technology', 'sentiment' => 'Positive', 'time' => '1 hour ago', 'source' => 'TechLogistics Asia',
             'image' => 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=600&q=80'
-        ],
-        [
-            'title' => 'Panama Canal Authority Raises Daily Vessel Transit Allocations',
-            'summary' => 'Recent baseline water accumulation across Gatun Lake enables clearing parameters back toward optimal operational standards for global trade lanes.',
-            'category' => 'Infrastructure', 'sentiment' => 'Positive', 'time' => '3 hours ago', 'source' => 'Panama Dispatch',
-            'image' => 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=600&q=80'
-        ],
-        [
-            'title' => 'North Sea Cyber Incident Disrupts Freight Customs Clearing Terminals',
-            'summary' => 'A concentrated ransomware vector targeting legacy freight brokerage networks has forced manual cross-docking logging across multiple regional locations.',
-            'category' => 'Cyber Security', 'sentiment' => 'Negative', 'time' => '5 hours ago', 'source' => 'EuroShield Security',
-            'image' => 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=600&q=80'
-        ],
-        [
-            'title' => 'Global Air Freight Rates Stabilize Following Fleet Optimization',
-            'summary' => 'Major international cargo carriers report balanced cargo loads and fuel pricing adjustments, minimizing unexpected overhead costs for regional suppliers.',
-            'category' => 'Aviation', 'sentiment' => 'Positive', 'time' => '8 hours ago', 'source' => 'AeroCargo World',
-            'image' => 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=600&q=80'
         ]
     ];
 
@@ -301,8 +344,6 @@ Route::get('/news', function () {
                 <h3 class='text-xs font-bold text-gray-400 uppercase tracking-wider mb-4'>Global Node Sentiment (24H)</h3>
                 <div class='space-y-4'>
                     <div><div class='flex justify-between text-xs font-bold mb-1'><span class='text-emerald-400'>Positive Sentiment</span><span class='text-gray-300'>58%</span></div><div class='w-full bg-gray-900 h-2 rounded-full overflow-hidden'><div class='bg-emerald-500 h-full w-[58%]'></div></div></div>
-                    <div><div class='flex justify-between text-xs font-bold mb-1'><span class='text-amber-400'>Neutral Sentiment</span><span class='text-gray-300'>22%</span></div><div class='w-full bg-gray-900 h-2 rounded-full overflow-hidden'><div class='bg-amber-500 h-full w-[22%]'></div></div></div>
-                    <div><div class='flex justify-between text-xs font-bold mb-1'><span class='text-red-400'>Negative Risk Sentiment</span><span class='text-gray-300'>20%</span></div><div class='w-full bg-gray-900 h-2 rounded-full overflow-hidden'><div class='bg-red-500 h-full w-[20%]'></div></div></div>
                 </div>
             </div>
         </div>
@@ -310,108 +351,6 @@ Route::get('/news', function () {
     @endsection";
 
     return response(Blade::render($htmlContent, compact('newsList')));
-});
-
-// ROUTE LOG RIWAYAT BARU
-Route::get('/cargo/history', function () {
-    $historyLogs = [
-        [
-            'id' => 'EXP-2026-001', 'carrier' => 'MV Blue Wave Ocean', 
-            'origin' => 'Tanjung Priok (ID)', 'destination' => 'Port of Singapore (SG)', 
-            'tonnage' => '45,000 Tons', 'value' => '$1,250,000', 'status' => 'Archived / Clear'
-        ],
-        [
-            'id' => 'EXP-2026-002', 'carrier' => 'Evergreen Intercept', 
-            'origin' => 'Port of Rotterdam (NL)', 'destination' => 'Shanghai Port (CN)', 
-            'tonnage' => '82,500 Tons', 'value' => '$3,400,000', 'status' => 'Archived / Clear'
-        ],
-        [
-            'id' => 'EXP-2026-003', 'carrier' => 'Pacific Titan', 
-            'origin' => 'Port of LA (US)', 'destination' => 'Tokyo Bay (JP)', 
-            'tonnage' => '61,200 Tons', 'value' => '$2,150,000', 'status' => 'Archived / Clear'
-        ]
-    ];
-
-    $htmlContent = "
-    @extends(view()->exists('layouts.app') ? 'layouts.app' : (view()->exists('welcome') ? 'welcome' : 'dashboard'))
-    @section('content')
-    <div class='container mx-auto px-4 py-6'>
-        <div class='flex justify-between items-start mb-6'>
-            <div>
-                <h2 class='text-xl font-bold text-cyan-400 flex items-center gap-2'>
-                    <span>🗂️</span> Archival Expedition Logbook
-                </h2>
-                <p class='text-[11px] text-gray-400 uppercase tracking-wider mt-1'>DATA ARSIP KERING DAN PENYELESAIAN MANIFEST PELAYARAN</p>
-            </div>
-            <span class='text-[10px] bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded border border-emerald-500/20 font-mono'>🔒 Data Authenticated</span>
-        </div>
-
-        <div class='grid grid-cols-1 md:grid-cols-3 gap-4 mb-6'>
-            <div class='bg-[#111827] border border-gray-800 p-5 rounded-xl flex items-center gap-4'>
-                <div class='p-3 bg-blue-500/10 text-blue-400 rounded-lg text-lg'>🚢</div>
-                <div>
-                    <span class='text-[10px] uppercase font-bold text-gray-500 tracking-wider block'>Total Archived</span>
-                    <span class='text-2xl font-black text-white'>3 Armada</span>
-                </div>
-            </div>
-            <div class='bg-[#111827] border border-gray-800 p-5 rounded-xl flex items-center gap-4'>
-                <div class='p-3 bg-emerald-500/10 text-emerald-400 rounded-lg text-lg'>📦</div>
-                <div>
-                    <span class='text-[10px] uppercase font-bold text-gray-500 tracking-wider block'>Cargo Volume</span>
-                    <span class='text-2xl font-black text-white'>188,700 Tons</span>
-                </div>
-            </div>
-            <div class='bg-[#111827] border border-gray-800 p-5 rounded-xl flex items-center gap-4'>
-                <div class='p-3 bg-amber-500/10 text-amber-400 rounded-lg text-lg'>💰</div>
-                <div>
-                    <span class='text-[10px] uppercase font-bold text-gray-500 tracking-wider block'>Financial Valuation</span>
-                    <span class='text-2xl font-black text-white'>$6,800,000.00</span>
-                </div>
-            </div>
-        </div>
-
-        <div class='bg-[#111827] border border-gray-800 rounded-xl overflow-hidden shadow-lg'>
-            <div class='bg-gray-900/50 px-4 py-3 border-b border-gray-800 flex items-center gap-2'>
-                <span class='text-xs text-blue-400'>📊</span>
-                <span class='text-[11px] uppercase font-bold text-gray-300 tracking-wider'>MANIFEST AUDIT PELAYARAN SELESAI</span>
-            </div>
-            <div class='overflow-x-auto'>
-                <table class='w-full text-left border-collapse'>
-                    <thead>
-                        <tr class='border-b border-gray-800 text-[11px] text-gray-400 uppercase tracking-wider bg-gray-900/20'>
-                            <th class='p-4 font-bold'>ID Ekspedisi</th>
-                            <th class='p-4 font-bold'>Nama Kapal / Carrier</th>
-                            <th class='p-4 font-bold'>Pelabuhan Keberangkatan</th>
-                            <th class='p-4 font-bold'>Pelabuhan Tujuan</th>
-                            <th class='p-4 font-bold'>Kargo Tonase</th>
-                            <th class='p-4 font-bold'>Valuasi Finansial</th>
-                            <th class='p-4 font-bold text-center'>Status Pelaporan</th>
-                        </tr>
-                    </thead>
-                    <tbody class='divide-y divide-gray-800/60 text-xs text-gray-300'>
-                        @foreach(\$historyLogs as \$log)
-                            <tr class='hover:bg-gray-900/40 transition'>
-                                <td class='p-4 font-mono font-bold text-gray-400'>{{ \$log['id'] }}</td>
-                                <td class='p-4 font-bold text-white'>{{ \$log['carrier'] }}</td>
-                                <td class='p-4 text-gray-400'>{{ \$log['origin'] }}</td>
-                                <td class='p-4 text-gray-400'>{{ \$log['destination'] }}</td>
-                                <td class='p-4 font-semibold text-emerald-400'>{{ \$log['tonnage'] }}</td>
-                                <td class='p-4 font-bold text-amber-500'>{{ \$log['value'] }}</td>
-                                <td class='p-4 text-center'>
-                                    <span class='px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase'>
-                                        {{ \$log['status'] }}
-                                    </span>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    @endsection";
-
-    return response(Blade::render($htmlContent, compact('historyLogs')));
 });
 
 // Sisa rute pelengkap aplikasi
