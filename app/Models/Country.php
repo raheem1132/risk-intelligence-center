@@ -1,0 +1,36 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Country extends Model
+{
+    protected $fillable = [
+        'name',
+        'code_iso2',
+        'region',
+        'currency_code',
+        'language',
+        'population',
+        'gdp',
+        'inflation_rate'
+    ];
+
+    /**
+     * Relasi ke tabel ports (Satu negara bisa punya banyak pelabuhan)
+     */
+    public function ports(): HasMany
+    {
+        return $this->hasMany(Port::class);
+    }
+
+    /**
+     * Relasi ke tabel risk_scores (Satu negara punya riwayat skor risiko)
+     */
+    public function riskScores(): HasMany
+    {
+        return $this->hasMany(RiskScore::class);
+    }
+}
