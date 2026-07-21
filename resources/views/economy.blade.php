@@ -1,88 +1,15 @@
 @extends('layouts.app')
-
 @section('content')
-<!-- Header Konten -->
-<div class="mb-8">
-    <h2 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-        📊 Macroeconomic Risk Monitor
-    </h2>
-    <p class="text-sm text-gray-400 mt-1">Tracking fiscal stability, currency volatility, and GDP growth metrics across trade routes</p>
+<style>
+.economy-page{max-width:1540px;margin:auto;color:#eef5ff}.eco-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:20px}.eco-kicker{color:#35e6b1;font-size:.69rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase}.eco-head h1{font-size:2.35rem;font-weight:850;letter-spacing:-.045em;margin:6px 0}.eco-head p{margin:0;color:#8da0b8;font-size:.82rem}.api-state{padding:9px 14px;border:1px solid #2a4259;background:#0d1725;border-radius:99px;color:#b4c4d7;font-size:.68rem}.api-state i{display:inline-block;width:8px;height:8px;background:#35e6b1;border-radius:50%;box-shadow:0 0 13px #35e6b1;margin-right:8px}.market-hero{position:relative;overflow:hidden;display:grid;grid-template-columns:1.4fr .9fr;gap:20px;padding:24px;border:1px solid #2b3d55;border-radius:21px;background:linear-gradient(135deg,#13243a,#0a1422 56%,#191436);margin-bottom:15px}.market-hero:after{content:"";position:absolute;width:300px;height:300px;border-radius:50%;right:-90px;top:-150px;background:#775aff;filter:blur(105px);opacity:.19}.hero-copy{position:relative;z-index:1}.hero-copy span{color:#8294ac;font-size:.67rem}.hero-copy strong{display:block;font-size:2.2rem;margin:7px 0}.hero-copy p{color:#7f92aa;font-size:.69rem;line-height:1.55;max-width:610px}.coverage{position:relative;z-index:1;display:flex;align-items:center;justify-content:flex-end;gap:18px}.coverage-ring{width:112px;height:112px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#35e6b1 {{ $countries->count() ? $covered/$countries->count()*360 : 0 }}deg,#1d2c40 0);position:relative}.coverage-ring:after{content:"";position:absolute;inset:10px;background:#0e1928;border-radius:50%}.coverage-ring div{z-index:1;text-align:center}.coverage-ring strong{font-size:1.35rem;display:block}.coverage-ring span{font-size:.54rem}.coverage-copy strong{font-size:.9rem}.coverage-copy p{color:#71849c;font-size:.62rem;margin:5px 0}.sync-link{display:inline-block;color:#42e2b1;text-decoration:none;font-size:.62rem;margin-top:4px}.eco-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:15px}.eco-stat{padding:16px;border:1px solid #25374e;border-radius:16px;background:linear-gradient(145deg,#111c2c,#0b1421)}.eco-stat span{display:block;color:#7c8fa8;font-size:.63rem}.eco-stat strong{display:block;font-size:1.3rem;margin:5px 0}.eco-stat small{color:#35e6b1;font-size:.58rem}.analytics-grid{display:grid;grid-template-columns:1.6fr .8fr;gap:15px;margin-bottom:15px}.eco-panel{padding:19px;border:1px solid #26384f;background:#0d1725;border-radius:18px;min-width:0}.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.panel-head h2{font-size:.9rem;font-weight:800;margin:0}.panel-head span{font-size:.61rem;color:#7588a1}.chart-box{height:285px}.inflation-list{display:flex;flex-direction:column;gap:9px}.inflation-item{display:grid;grid-template-columns:31px 1fr auto;gap:9px;align-items:center;padding:9px;background:#09131f;border-radius:10px}.inflation-item img{width:31px;height:21px;object-fit:cover;border-radius:4px;background:#fff}.inflation-item strong{font-size:.67rem;display:block}.inflation-item span{font-size:.56rem;color:#73869f}.inflation-value{color:#ff7189!important;font-size:.72rem!important;font-weight:850}.ledger{border:1px solid #26384f;background:#0d1725;border-radius:18px;overflow:hidden}.ledger-tools{display:grid;grid-template-columns:1fr 220px 190px auto;gap:9px;padding:14px;border-bottom:1px solid #223249}.ledger-tools input,.ledger-tools select{height:43px;border:1px solid #2a3d56;background:#09131f;color:#fff;border-radius:10px;padding:0 12px;font-size:.69rem}.ledger-tools button{border:0;border-radius:10px;background:#35e6b1;color:#05140f;padding:0 17px;font-size:.67rem;font-weight:850}.ledger-title{display:flex;justify-content:space-between;padding:13px 16px;color:#8294ac;font-size:.65rem;background:#101c2d}.table-wrap{max-height:650px;overflow:auto}.eco-table{width:100%;border-collapse:collapse}.eco-table thead{position:sticky;top:0;background:#0d1725;z-index:2}.eco-table th{padding:13px 15px;text-align:left;color:#74879f;font-size:.61rem;text-transform:uppercase;letter-spacing:.1em}.eco-table td{padding:13px 15px;border-top:1px solid #1d2c40;font-size:.7rem}.eco-table tbody tr:hover{background:#122035}.country-cell{display:flex;align-items:center;gap:10px}.country-cell img{width:34px;height:23px;object-fit:cover;border-radius:5px;background:#fff}.country-cell strong{display:block;font-size:.72rem}.country-cell span{color:#71839b;font-size:.58rem}.number{font-family:ui-monospace,monospace;font-weight:700}.inflation-pill{display:inline-flex;padding:5px 8px;border-radius:99px;font-size:.61rem;font-weight:800}.inflation-pill.low{background:#123a30;color:#45e4b2}.inflation-pill.medium{background:#413518;color:#ffd05b}.inflation-pill.high{background:#421c29;color:#ff748c}.year-badge{padding:4px 7px;background:#17263a;border-radius:6px;color:#9db0c8}.report-link{display:inline-block;text-decoration:none;color:#43dfb0;border:1px solid #2d435c;border-radius:8px;padding:6px 9px;font-size:.6rem}.missing{color:#657990}.empty-row{display:none;padding:40px;text-align:center;color:#7c8fa7}
+@media(max-width:1100px){.market-hero,.analytics-grid{grid-template-columns:1fr}.coverage{justify-content:flex-start}.eco-stats{grid-template-columns:1fr 1fr}.ledger-tools{grid-template-columns:1fr 1fr}.eco-table{min-width:900px}}@media(max-width:650px){.eco-head{align-items:flex-start;flex-direction:column}.eco-stats,.ledger-tools{grid-template-columns:1fr}.coverage{flex-direction:column;align-items:flex-start}}
+</style>
+<div class="economy-page">
+ <header class="eco-head"><div><div class="eco-kicker">Macroeconomic Intelligence</div><h1>Global Economy Monitor</h1><p>Snapshot GDP, inflasi, dan populasi dari database World Bank yang telah disinkronkan.</p></div><div class="api-state"><i></i>World Bank data pipeline ready</div></header>
+ <section class="market-hero"><div class="hero-copy"><span>GLOBAL GDP REPRESENTED</span><strong>${{ number_format($totalGdp/1e12,2) }} Trillion</strong><p>Nilai agregat berasal dari snapshot terbaru setiap negara yang tersedia. Data yang tidak didukung provider tidak digantikan dengan angka generator.</p></div><div class="coverage"><div class="coverage-ring"><div><strong>{{ $covered }}</strong><span>SYNCED</span></div></div><div class="coverage-copy"><strong>{{ $covered }} dari {{ $countries->count() }} wilayah</strong><p>Cakupan indikator ekonomi aktual</p><a class="sync-link" href="/reports">Kelola melalui Report Center →</a></div></div></section>
+ <section class="eco-stats"><article class="eco-stat"><span>Rata-rata inflasi global</span><strong>{{ number_format($averageInflation,2) }}%</strong><small>Snapshot tersedia</small></article><article class="eco-stat"><span>Inflasi tinggi</span><strong>{{ $highInflation }}</strong><small>Negara ≥ 8%</small></article><article class="eco-stat"><span>Ekonomi terbesar</span><strong>{{ $topGdp->first()['name'] ?? '—' }}</strong><small>{{ isset($topGdp[0]) ? '$'.number_format($topGdp[0]['gdp']/1e12,2).'T' : 'No data' }}</small></article><article class="eco-stat"><span>Wilayah termonitor</span><strong>{{ $regionData->count() }}</strong><small>Regional coverage</small></article></section>
+ <section class="analytics-grid"><article class="eco-panel"><div class="panel-head"><h2>Largest Economies</h2><span>GDP terbaru · USD trillion</span></div><div class="chart-box"><canvas id="gdpChart"></canvas></div></article><aside class="eco-panel"><div class="panel-head"><h2>Inflation Watch</h2><span>Top exposure</span></div><div class="inflation-list">@foreach($inflationLeaders as $country)<div class="inflation-item"><img src="https://flagcdn.com/w80/{{ $country['code'] }}.png" alt="" onerror="this.style.display='none'"><div><strong>{{ $country['name'] }}</strong><span>{{ $country['region'] }}</span></div><span class="inflation-value">{{ number_format($country['inflation'],2) }}%</span></div>@endforeach</div></aside></section>
+ <section class="ledger"><div class="ledger-tools"><input id="ecoSearch" placeholder="Cari negara atau kode ISO..."><select id="ecoRegion"><option value="all">Semua wilayah</option>@foreach($countries->pluck('region')->unique()->sort() as $region)<option>{{ $region }}</option>@endforeach</select><select id="ecoInflation"><option value="all">Semua tingkat inflasi</option><option value="low">Rendah &lt; 4%</option><option value="medium">Menengah 4–8%</option><option value="high">Tinggi ≥ 8%</option><option value="missing">Data belum tersedia</option></select><button type="button" onclick="location.reload()">↻ Muat ulang</button></div><div class="ledger-title"><span>Macroeconomic Country Ledger</span><span><strong id="ecoCount">{{ $countries->count() }}</strong> wilayah ditampilkan</span></div><div class="table-wrap"><table class="eco-table"><thead><tr><th>Negara</th><th>GDP (USD)</th><th>Inflasi</th><th>Populasi</th><th>Tahun</th><th>Laporan</th></tr></thead><tbody>@foreach($countries as $country)@php $level=$country['inflation']===null?'missing':($country['inflation']>=8?'high':($country['inflation']>=4?'medium':'low')); @endphp<tr class="eco-row" data-search="{{ strtolower($country['name'].' '.$country['code']) }}" data-region="{{ $country['region'] }}" data-level="{{ $level }}"><td><div class="country-cell"><img src="https://flagcdn.com/w80/{{ $country['code'] }}.png" alt="" onerror="this.style.display='none'"><div><strong>{{ $country['name'] }}</strong><span>{{ $country['region'] }} · {{ strtoupper($country['code']) }}</span></div></div></td><td>@if($country['gdp']!==null)<span class="number">${{ number_format($country['gdp']/1e9,2) }}B</span>@else<span class="missing">Belum tersedia</span>@endif</td><td>@if($country['inflation']!==null)<span class="inflation-pill {{ $level }}">{{ number_format($country['inflation'],2) }}%</span>@else<span class="missing">—</span>@endif</td><td>@if($country['population']!==null)<span class="number">{{ number_format($country['population']) }}</span>@else<span class="missing">—</span>@endif</td><td><span class="year-badge">{{ $country['year'] ?: '—' }}</span></td><td><a class="report-link" href="{{ route('reports.country',strtoupper($country['code'])) }}">Buka insight →</a></td></tr>@endforeach</tbody></table><div class="empty-row" id="ecoEmpty">Tidak ada negara yang cocok dengan filter.</div></div></section>
 </div>
-
-<!-- Grid Kartu Indikator Utama -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <div class="bg-[#111827] border border-gray-800/80 rounded-xl p-5">
-        <span class="text-xs text-gray-500 font-medium block">Highest Inflation Node</span>
-        <div class="flex items-baseline justify-between mt-2">
-            <span class="text-xl font-bold text-rose-400">Venezuela (140.2%)</span>
-            <span class="text-[10px] bg-rose-950/50 text-rose-400 px-1.5 py-0.5 rounded border border-rose-900/40">Hyperinflation</span>
-        </div>
-    </div>
-    <div class="bg-[#111827] border border-gray-800/80 rounded-xl p-5">
-        <span class="text-xs text-gray-400 font-medium block text-emerald-400 flex items-center gap-1.5">
-            Global Growth Leader
-        </span>
-        <div class="flex items-baseline justify-between mt-2">
-            <span class="text-xl font-bold text-white">India (+6.8%)</span>
-            <span class="text-[10px] bg-emerald-950/50 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-900/30">Expansion</span>
-        </div>
-    </div>
-    <div class="bg-[#111827] border border-gray-800/80 rounded-xl p-5">
-        <span class="text-xs text-gray-500 font-medium block">Fx Volatility Index</span>
-        <div class="flex items-baseline justify-between mt-2">
-            <span class="text-xl font-bold text-amber-400">High Risk (USD/TRY)</span>
-            <span class="text-[10px] bg-amber-950/50 text-amber-400 px-1.5 py-0.5 rounded border border-amber-900/30">Unstable</span>
-        </div>
-    </div>
-</div>
-
-<!-- Tabel Data Ekonomi Global -->
-<div class="bg-[#111827] border border-gray-800/80 rounded-xl overflow-hidden shadow-sm">
-    <div class="p-6 border-b border-gray-800/60 flex justify-between items-center">
-        <h3 class="text-base font-bold text-white">Key Trade Nodes Economic Ledger</h3>
-        <span class="text-xs text-gray-500">Live fiscal indicators (Auto Generated Loop)</span>
-    </div>
-    <div class="overflow-x-auto h-[500px] overflow-y-auto">
-        <table class="w-full text-left border-collapse">
-            <thead class="sticky top-0 z-10">
-                <tr class="text-xs text-gray-500 bg-[#111827] border-b border-gray-800">
-                    <th class="p-4 font-semibold">Country</th>
-                    <th class="p-4 font-semibold">GDP Growth</th>
-                    <th class="p-4 font-semibold">Inflation Rate</th>
-                    <th class="p-4 font-semibold">Local Currency</th>
-                    <th class="p-4 font-semibold text-center">Debt-to-GDP Risk</th>
-                </tr>
-            </thead>
-            <tbody class="text-sm divide-y divide-gray-800/40">
-                @php
-                    // Array dasar data ekonomi lek
-                    $baseEco = [
-                        ['c' => '🇮🇩 Indonesia', 'gdp' => '+5.05%', 'inf' => '2.8%', 'cur' => 'IDR (Stable)', 'risk' => 'Low Risk (39%)', 'col' => 'text-emerald-400 bg-emerald-950/50 border-emerald-900/40'],
-                        ['c' => '🇸🇬 Singapore', 'gdp' => '+2.10%', 'inf' => '1.9%', 'cur' => 'SGD (Strong)', 'risk' => 'Medium (160%)', 'col' => 'text-amber-400 bg-amber-950/50 border-amber-900/40'],
-                        ['c' => '🇺🇸 United States', 'gdp' => '+2.40%', 'inf' => '3.1%', 'cur' => 'USD (Base)', 'risk' => 'High Alert (122%)', 'col' => 'text-rose-400 bg-rose-950/50 border-rose-900/40'],
-                        ['c' => '🇩🇿 Algeria', 'gdp' => '+3.80%', 'inf' => '9.3%', 'cur' => 'DZD (Volatile)', 'risk' => 'Medium Risk (55%)', 'col' => 'text-amber-400 bg-amber-950/50 border-amber-900/40'],
-                        ['c' => '🇯🇵 Japan', 'gdp' => '+0.90%', 'inf' => '2.5%', 'cur' => 'JPY (Safe Haven)', 'risk' => 'Critical Debt (260%)', 'col' => 'text-rose-400 bg-rose-950/50 border-rose-900/40'],
-                        ['c' => '🇩🇪 Germany', 'gdp' => '-0.30%', 'inf' => '5.9%', 'cur' => 'EUR (Stable)', 'risk' => 'Low Risk (66%)', 'col' => 'text-emerald-400 bg-emerald-950/50 border-emerald-900/40'],
-                    ];
-                @endphp
-
-                {{-- Kita loop sebanyak 30 baris contoh biar penuh layarnya lek --}}
-                @for ($i = 0; $i < 255; $i++)
-                    @php $data = $baseEco[$i % count($baseEco)]; @endphp
-                    <tr class="hover:bg-gray-800/20 transition">
-                        <td class="p-4 font-medium text-gray-200">{{ $data['c'] }} #{{ $i + 1 }}</td>
-                        <td class="p-4 {{ str_contains($data['gdp'], '-') ? 'text-rose-400' : 'text-emerald-400' }} font-medium">{{ $data['gdp'] }}</td>
-                        <td class="p-4 text-gray-300">{{ $data['inf'] }}</td>
-                        <td class="p-4 text-gray-400">{{ $data['cur'] }}</td>
-                        <td class="p-4 text-center">
-                            <span class="text-[10px] border px-2 py-0.5 rounded font-semibold {{ $data['col'] }}">
-                                {{ $data['risk'] }}
-                            </span>
-                        </td>
-                    </tr>
-                @endfor
-            </tbody>
-        </table>
-    </div>
-</div>
+<script>document.addEventListener('DOMContentLoaded',()=>{Chart.defaults.color='#8193ab';Chart.defaults.borderColor='rgba(130,150,175,.1)';new Chart(document.getElementById('gdpChart'),{type:'bar',data:{labels:{{ Illuminate\Support\Js::from($topGdpLabels) }},datasets:[{data:{{ Illuminate\Support\Js::from($topGdpValues) }},backgroundColor:['#35e6b1','#37c8ff','#9878ff','#fbbf24','#ff7189','#4ade80','#60a5fa','#c084fc'],borderRadius:7}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(130,150,175,.08)'},title:{display:true,text:'USD Trillion'}},y:{grid:{display:false}}}}});const search=document.getElementById('ecoSearch'),region=document.getElementById('ecoRegion'),inflation=document.getElementById('ecoInflation'),rows=[...document.querySelectorAll('.eco-row')];function filter(){let count=0;rows.forEach(row=>{const show=row.dataset.search.includes(search.value.toLowerCase())&&(region.value==='all'||row.dataset.region===region.value)&&(inflation.value==='all'||row.dataset.level===inflation.value);row.style.display=show?'':'none';if(show)count++});document.getElementById('ecoCount').textContent=count;document.getElementById('ecoEmpty').style.display=count?'none':'block'}[search,region,inflation].forEach(el=>el.addEventListener(el===search?'input':'change',filter))});</script>
 @endsection

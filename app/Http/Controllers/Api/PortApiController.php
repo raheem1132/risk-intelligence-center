@@ -20,13 +20,16 @@ class PortApiController extends Controller
     /**
      * 1. API Ambil Semua Data Pelabuhan beserta Skor & Status Risikonya
      */
-    public function index()
+    public function index(Request $request)
     {
-        $ports = DB::table('ports')->get();
+        $ports = DB::table('ports')
+            ->when($request->query('q'), fn ($query, $search) => $query->where(fn ($q) => $q->where('port_name', 'like', "%{$search}%")->orWhere('country_name', 'like', "%{$search}%")))
+            ->orderBy('port_name')->paginate(min(100, max(1, $request->integer('per_page', 25))));
         return response()->json([
             'status' => 'success',
             'message' => 'Port risk intelligence data retrieved successfully.',
-            'data' => $ports
+            'data' => $ports->items(),
+            'meta' => ['current_page'=>$ports->currentPage(),'last_page'=>$ports->lastPage(),'per_page'=>$ports->perPage(),'total'=>$ports->total()]
         ], 200);
     }
 
@@ -105,7 +108,7 @@ class PortApiController extends Controller
             'status' => 'success',
             'message' => 'New port registered successfully.',
             'port_id' => $id
-        ], 21);
+        ], 201);
     }
 
     /**

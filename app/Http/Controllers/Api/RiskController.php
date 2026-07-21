@@ -37,7 +37,7 @@ class RiskController extends Controller
         }
 
         // Lempar data ke Service untuk dihitung rumusnya secara otomatis
-        $processedData = $this->riskService->getRiskDataCollection($countries);
+        $processedData = $this->riskService->getRiskDataCollection($countries, $request->boolean('refresh'));
 
         return response()->json([
             'status' => 'success',

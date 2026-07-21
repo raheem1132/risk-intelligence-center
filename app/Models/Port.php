@@ -10,9 +10,18 @@ class Port extends Model
     protected $fillable = [
         'country_id',
         'port_name',
+        'country_code',
+        'country_name',
         'port_code',
         'latitude',
-        'longitude'
+        'longitude',
+        'risk_status',
+        'risk_score',
+        'details',
+        'wpi_number',
+        'harbor_size',
+        'harbor_type',
+        'source',
     ];
 
     /**

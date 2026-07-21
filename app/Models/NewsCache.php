@@ -15,5 +15,6 @@ class NewsCache extends Model
         'url',
         'source_name',
         'sentiment_status'
+        ,'keyword','payload','sentiment_result'
     ];
 }

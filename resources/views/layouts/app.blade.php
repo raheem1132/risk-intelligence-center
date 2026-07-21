@@ -1,91 +1,45 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-[#0B0F17]">
+<html lang="id" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SupplyGuard Pro - Risk Intelligence</title>
-    <!-- Tailwind CSS CDN -->
+    <title>SupplyGuard · Risk Intelligence</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+    <style>
+        :root{--sidebar-width:276px;--sidebar-mini:84px;--nav-bg:#0c1422;--nav-line:#1d2b3e;--nav-muted:#8190a7;--brand:#35e6b1}
+        html,body{height:100%;margin:0;background:#070b12!important;color:#d1d5db}body{display:flex;overflow:hidden;font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif}.app-sidebar{width:var(--sidebar-width);height:100vh;flex:0 0 var(--sidebar-width);background:linear-gradient(180deg,#0f1929 0%,#0b1320 68%,#09111c 100%);border-right:1px solid var(--nav-line);display:flex;flex-direction:column;position:relative;z-index:2000;transition:width .25s ease,flex-basis .25s ease;box-shadow:18px 0 50px rgba(0,0,0,.08)}.brand{height:92px;padding:20px 20px 17px;display:flex;align-items:center;gap:13px;border-bottom:1px solid rgba(35,51,73,.65)}.brand-mark{width:43px;height:43px;flex:0 0 43px;border-radius:13px;display:grid;place-items:center;color:#071610;background:linear-gradient(145deg,#35e6b1,#3db8f3);box-shadow:0 9px 25px rgba(53,230,177,.18)}.brand-mark svg{width:23px;height:23px}.brand-copy{min-width:0}.brand-copy strong{display:block;color:#f6f9fd;font-size:.91rem;white-space:nowrap;letter-spacing:-.01em}.brand-copy span{display:block;color:var(--brand);font-size:.57rem;letter-spacing:.16em;font-weight:800;margin-top:3px}.collapse-nav{margin-left:auto;width:26px;height:26px;display:grid;place-items:center;border:1px solid #2a3a50;background:#111e30;color:#71839b;border-radius:8px}.collapse-nav svg{width:14px}.nav-scroll{flex:1;overflow-y:auto;padding:17px 13px 14px;scrollbar-width:thin;scrollbar-color:#26374d transparent}.nav-group{margin-bottom:17px}.nav-label{display:flex;align-items:center;justify-content:space-between;padding:0 11px 7px;color:#53657d;font-size:.57rem;font-weight:850;letter-spacing:.16em;text-transform:uppercase;white-space:nowrap}.nav-link-pro{position:relative;display:flex;align-items:center;gap:12px;min-height:43px;padding:10px 12px;margin:3px 0;color:var(--nav-muted);border:1px solid transparent;border-radius:11px;text-decoration:none;font-size:.72rem;font-weight:650;white-space:nowrap;transition:.18s}.nav-link-pro svg{width:17px;height:17px;flex:0 0 17px}.nav-link-pro:hover{color:#eef5ff;background:#121f31;border-color:#1f3045}.nav-link-pro.active{color:#fff;background:linear-gradient(90deg,rgba(53,230,177,.16),rgba(55,200,255,.06));border-color:rgba(53,230,177,.21);box-shadow:inset 3px 0 0 var(--brand),0 7px 22px rgba(0,0,0,.1)}.nav-link-pro.active svg{color:var(--brand);filter:drop-shadow(0 0 5px rgba(53,230,177,.3))}.nav-badge{margin-left:auto;min-width:20px;height:18px;padding:0 6px;display:grid;place-items:center;border-radius:99px;background:#19283c;color:#8295ad;font-size:.52rem}.nav-badge.live{color:#42e8b5;background:#12372e}.admin-link{color:#62e9bd}.admin-link:after{content:"ADMIN";margin-left:auto;padding:3px 6px;border-radius:5px;background:#15372f;color:#4de2b4;font-size:.47rem;letter-spacing:.08em}.sidebar-footer{padding:13px;border-top:1px solid var(--nav-line);background:rgba(5,11,19,.35)}.user-card{display:flex;align-items:center;gap:11px;padding:9px;border-radius:12px;background:#0f1a2a;border:1px solid #1e2d41}.user-avatar{width:38px;height:38px;flex:0 0 38px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,#17372f,#10233a);border:1px solid #2a6a57;color:#49e7b5;font-size:.68rem;font-weight:900}.user-info{flex:1;min-width:0}.user-info strong{display:block;color:#f4f8fc;font-size:.7rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.user-info span{display:flex;align-items:center;gap:5px;color:#71839c;font-size:.55rem;margin-top:3px}.user-info i{width:5px;height:5px;border-radius:50%;background:#35e6b1}.logout-button{width:30px;height:30px;display:grid;place-items:center;border:0;background:transparent;color:#71839b;border-radius:8px}.logout-button:hover{background:#321925;color:#ff7088}.logout-button svg{width:15px}.app-main{flex:1;height:100vh;min-width:0;overflow-y:auto;background:radial-gradient(circle at 95% 0,#111e2e 0,#090f18 39%,#070b12 100%);padding:32px}.mobile-topbar{display:none}.sidebar-overlay{display:none}
+        body.sidebar-mini .app-sidebar{width:var(--sidebar-mini);flex-basis:var(--sidebar-mini)}body.sidebar-mini .brand{padding-left:20px}body.sidebar-mini .brand-copy,body.sidebar-mini .collapse-nav,body.sidebar-mini .nav-label,body.sidebar-mini .nav-link-pro>span,body.sidebar-mini .nav-badge,body.sidebar-mini .user-info,body.sidebar-mini .logout-button,body.sidebar-mini .admin-link:after{display:none}body.sidebar-mini .nav-link-pro{justify-content:center;padding:11px}body.sidebar-mini .nav-link-pro.active{box-shadow:inset 3px 0 0 var(--brand)}body.sidebar-mini .user-card{justify-content:center;padding:8px}
+        @media(max-width:900px){body{display:block;overflow:hidden}.mobile-topbar{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#0d1725;border-bottom:1px solid #203047}.mobile-brand{display:flex;align-items:center;gap:9px;color:#fff;font-size:.75rem;font-weight:800}.mobile-menu{width:36px;height:36px;display:grid;place-items:center;border:1px solid #2c4057;border-radius:9px;background:#121f31;color:#c1cede}.mobile-menu svg{width:18px}.app-sidebar{position:fixed;left:-290px;top:0;width:276px!important;transition:left .25s ease}.app-sidebar.open{left:0}.collapse-nav{display:none}.sidebar-overlay{display:block;position:fixed;inset:0;background:rgba(1,5,10,.7);backdrop-filter:blur(3px);z-index:1900;opacity:0;visibility:hidden;transition:.2s}.sidebar-overlay.open{opacity:1;visibility:visible}.app-main{height:calc(100vh - 62px);padding:20px 15px}}
+    </style>
 </head>
-<body class="h-full flex text-gray-300 antialiased">
-
-    <!-- SIDEBAR UTAMA (KIRI) -->
-    <aside class="w-64 bg-[#111827] border-r border-gray-800/80 flex flex-col justify-between h-screen sticky top-0">
-        <div class="p-6">
-            <!-- Logo / Brand -->
-            <div class="flex items-center gap-3 mb-8">
-                <div class="w-8 h-8 rounded-lg bg-emerald-950/50 border border-emerald-900/50 flex items-center justify-center text-emerald-400">
-                    🛡️
-                </div>
-                <div>
-                    <h1 class="text-sm font-bold text-white tracking-wide">Global Supply Chain</h1>
-                    <span class="text-[10px] text-emerald-400 uppercase font-semibold tracking-wider block mt-0.5">Risk Intelligence</span>
-                </div>
-            </div>
-
-            <!-- Menu Navigasi -->
-            <nav class="space-y-1">
-                <span class="text-[10px] uppercase font-bold text-gray-500 tracking-wider block px-3 mb-2">Main Control</span>
-                
-                <a href="/dashboard" class="flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/50 transition">
-                    🎛️ Dashboard
-                </a>
-                <a href="/countries" class="flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/50 transition">
-                    🌍 Countries
-                </a>
-                <a href="/weather" class="flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/50 transition">
-                    ☁️ Weather
-                </a>
-                <a href="/economy" class="flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/50 transition">
-                    📊 Economy
-                </a>
-                <a href="/ports" class="flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/50 transition">
-                    ⚓ Ports
-                </a>
-                <a href="/news" class="flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/50 transition">
-                    📰 News & Events
-                </a>
-
-                <span class="text-[10px] uppercase font-bold text-gray-500 tracking-wider block px-3 pt-4 mb-2">Analytics</span>
-                
-                <a href="/risk-scores" class="flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/50 transition">
-                    📈 Risk Scores
-                </a>
-                <a href="/watchlist" class="flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/50 transition">
-                    🗂️ Watchlist
-                </a>
-                <a href="/compare" class="flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/50 transition">
-                    🔄 Compare
-                </a>
-                <a href="/map" class="flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/50 transition">
-                    🗺️ Global Map
-                </a>
-                <a href="/settings" class="flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/50 transition">
-                    ⚙️ Settings
-                </a>
-            </nav>
-        </div>
-
-        <!-- Bagian User Menu (Hasil Langkah 1 yang sudah Dinamis Lek) -->
-        <div class="p-4 border-t border-gray-800/60 flex items-center gap-3 bg-gray-950/20">
-            <div class="w-9 h-9 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-xs font-bold text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
-                USR
-            </div>
-            <div class="flex-1 min-w-0">
-                <!-- Data ini otomatis mengambil nama user lek -->
-                <h4 class="text-xs font-bold text-white truncate">{{ session('user_name', 'Dodo Mas') }}</h4>
-                <span class="text-[10px] text-gray-500 block truncate">Active Station</span>
-            </div>
-            <a href="/" class="text-xs text-gray-500 hover:text-rose-400 transition" title="Disconnect Session">
-                🚪
-            </a>
-        </div>
-    </aside>
-
-    <!-- AREA KONTEN UTAMA (KANAN) -->
-    <main class="flex-1 p-8 h-screen overflow-y-auto">
-        @yield('content')
-    </main>
-
-</body>
-</html>
+<body>
+@php
+    $navGroups = [
+        'Main Control'=>[
+            ['Dashboard','dashboard','layout-dashboard'],['Countries','countries','globe-2'],['Weather','weather','cloud-sun'],['Economy','economy*','chart-no-axes-combined'],['Currency','currency*','badge-dollar-sign'],['Ports','ports*','anchor'],['News & Events','news*','newspaper'],
+        ],
+        'Analytics'=>[
+            ['Risk Scores','risk-scores*','activity'],['Watchlist','watchlist*','bookmark'],['Compare','compare*','git-compare-arrows'],['Global Map','map*','map'],['Reports','reports*','file-chart-column'],['Settings','settings*','settings-2'],
+        ],
+    ];
+@endphp
+<header class="mobile-topbar"><div class="mobile-brand"><i data-lucide="shield-check"></i> SupplyGuard Intelligence</div><button class="mobile-menu" id="mobileMenu"><i data-lucide="menu"></i></button></header><div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="app-sidebar" id="appSidebar">
+    <div class="brand"><div class="brand-mark"><i data-lucide="shield-check"></i></div><div class="brand-copy"><strong>SupplyGuard Global</strong><span>RISK INTELLIGENCE</span></div><button class="collapse-nav" id="collapseNav" title="Collapse sidebar"><i data-lucide="panel-left-close"></i></button></div>
+    <nav class="nav-scroll">
+        @foreach($navGroups as $group=>$items)<section class="nav-group"><div class="nav-label"><span>{{ $group }}</span><span>••</span></div>@foreach($items as [$label,$pattern,$icon])@php $path=str_replace('*','', $pattern);$href=$label==='Dashboard'?'/dashboard':($label==='Risk Scores'?'/risk-scores':($label==='Global Map'?'/map':'/'.strtolower(str_replace([' & Events',' '],['','-'],$label))));$active=request()->is($pattern); @endphp<a href="{{ $href }}" class="nav-link-pro {{ $active?'active':'' }}" title="{{ $label }}"><i data-lucide="{{ $icon }}"></i><span>{{ $label }}</span>@if($label==='News & Events')<small class="nav-badge live">LIVE</small>@elseif($label==='Ports')<small class="nav-badge">12K</small>@endif</a>@endforeach</section>@endforeach
+        @if(auth()->user()?->is_admin)<section class="nav-group"><div class="nav-label"><span>Administration</span><span>••</span></div><a href="/admin" class="nav-link-pro admin-link {{ request()->is('admin*')?'active':'' }}"><i data-lucide="shield-cog"></i><span>Admin Console</span></a></section>@endif
+    </nav>
+    <footer class="sidebar-footer"><div class="user-card"><div class="user-avatar">{{ strtoupper(substr(auth()->user()?->name ?? 'Guest',0,2)) }}</div><div class="user-info"><strong>{{ auth()->user()?->name ?? 'Guest Analyst' }}</strong><span><i></i>{{ auth()->user()?->is_admin ? 'Administrator' : (auth()->check()?'Active session':'Public access') }}</span></div>@auth<form method="POST" action="{{ route('logout') }}">@csrf<button class="logout-button" title="Logout"><i data-lucide="log-out"></i></button></form>@else<a class="logout-button" href="/" title="Login"><i data-lucide="log-in"></i></a>@endauth</div></footer>
+</aside>
+<main class="app-main">@yield('content')</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{if(window.lucide)lucide.createIcons();const sidebar=document.getElementById('appSidebar'),overlay=document.getElementById('sidebarOverlay');document.getElementById('collapseNav')?.addEventListener('click',()=>{document.body.classList.toggle('sidebar-mini');localStorage.setItem('sidebar-mini',document.body.classList.contains('sidebar-mini')?'1':'0');setTimeout(()=>window.dispatchEvent(new Event('resize')),280)});if(localStorage.getItem('sidebar-mini')==='1'&&innerWidth>900)document.body.classList.add('sidebar-mini');const close=()=>{sidebar.classList.remove('open');overlay.classList.remove('open')};document.getElementById('mobileMenu')?.addEventListener('click',()=>{sidebar.classList.toggle('open');overlay.classList.toggle('open')});overlay.addEventListener('click',close);sidebar.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{if(innerWidth<=900)close()}))});
+</script>
+</body></html>

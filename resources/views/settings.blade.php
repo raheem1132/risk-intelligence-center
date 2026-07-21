@@ -1,90 +1,28 @@
 @extends('layouts.app')
-
 @section('content')
-<!-- Header Konten -->
-<div class="mb-8">
-    <h2 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-        ⚙️ System & Profile Configuration
-    </h2>
-    <p class="text-sm text-gray-400 mt-1">Manage global analytic engines, user preferences, and data sync credentials</p>
-</div>
-
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Kolom Kiri & Tengah: Panel Pengaturan -->
-    <div class="lg:col-span-2 space-y-6">
-        <!-- Card 1: Account Settings -->
-        <div class="bg-[#111827] border border-gray-800/80 rounded-xl p-6 shadow-sm">
-            <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-gray-800 pb-3 mb-4">
-                User Profile Information
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1.5 font-medium">Full Name</label>
-                    <input type="text" value="dodo mas" class="w-full bg-[#0B0F17] border border-gray-800 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 transition">
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1.5 font-medium">Email Address</label>
-                    <input type="email" value="dodomas@supplyguard.pro" class="w-full bg-[#0B0F17] border border-gray-800 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 transition">
-                </div>
-            </div>
-        </div>
-
-        <!-- Card 2: Risk Engine Parameters -->
-        <div class="bg-[#111827] border border-gray-800/80 rounded-xl p-6 shadow-sm">
-            <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-gray-800 pb-3 mb-4">
-                Risk Engine Thresholds
-            </h3>
-            <div class="space-y-4">
-                <div>
-                    <div class="flex justify-between text-xs text-gray-400 mb-1.5">
-                        <span>Critical Level Threshold</span>
-                        <span class="text-rose-400 font-bold">40.00+</span>
-                    </div>
-                    <input type="range" min="30" max="70" value="40" class="w-full accent-emerald-500 bg-gray-800 rounded-lg appearance-none h-2">
-                </div>
-                <div>
-                    <div class="flex justify-between text-xs text-gray-400 mb-1.5">
-                        <span>Sentiment Refresh Interval</span>
-                        <span class="text-emerald-400 font-bold">Every 15 Minutes</span>
-                    </div>
-                    <select class="w-full bg-[#0B0F17] border border-gray-800 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 transition">
-                        <option>Every 15 Minutes</option>
-                        <option>Every 1 Hour</option>
-                        <option>Every 12 Hours</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Kolom Kanan: Status Integrasi API -->
-    <div class="space-y-6">
-        <div class="bg-[#111827] border border-gray-800/80 rounded-xl p-6 shadow-sm">
-            <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-gray-800 pb-3 mb-4">
-                System Integration
-            </h3>
-            <div class="space-y-4">
-                <!-- API 1 -->
-                <div class="flex items-center justify-between p-3 bg-[#0B0F17] rounded-lg border border-gray-800/60">
-                    <div>
-                        <h4 class="text-xs font-bold text-gray-200">GNews API Sync</h4>
-                        <span class="text-[10px] text-emerald-400 font-semibold">CONNECTED</span>
-                    </div>
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span>
-                </div>
-                <!-- API 2 -->
-                <div class="flex items-center justify-between p-3 bg-[#0B0F17] rounded-lg border border-gray-800/60">
-                    <div>
-                        <h4 class="text-xs font-bold text-gray-200">OpenWeather Pro</h4>
-                        <span class="text-[10px] text-emerald-400 font-semibold">CONNECTED</span>
-                    </div>
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span>
-                </div>
-            </div>
-            <button class="w-full mt-6 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2.5 rounded-lg transition shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-                Save System Changes
-            </button>
-        </div>
+<style>
+    .settings-page{max-width:1540px;margin:auto;color:#edf5ff}.settings-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:20px}.settings-kicker{color:#35e6b1;font-size:.69rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase}.settings-head h1{font-size:2.25rem;font-weight:850;letter-spacing:-.04em;margin:7px 0}.settings-head p{color:#8b9db5;margin:0;font-size:.83rem}.system-pill{padding:9px 14px;border:1px solid #2b415a;background:#0d1725;border-radius:99px;color:#aec0d5;font-size:.69rem}.system-pill i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#35e6b1;box-shadow:0 0 12px #35e6b1;margin-right:8px}.flash{padding:12px 15px;border-radius:12px;margin-bottom:15px;font-size:.73rem}.flash.success{background:#123a30;border:1px solid #24624f;color:#4ce6b6}.flash.error{background:#3d1b27;border:1px solid #683044;color:#ff8599}.settings-layout{display:grid;grid-template-columns:230px 1fr;gap:16px}.settings-nav,.settings-panel{background:linear-gradient(145deg,#111c2d,#0b1421);border:1px solid #26384e;border-radius:18px}.settings-nav{padding:12px;height:max-content;position:sticky;top:0}.settings-nav a{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;color:#8fa1b8;text-decoration:none;font-size:.72rem}.settings-nav a:hover,.settings-nav a.active{background:#15243a;color:#fff}.settings-nav a.active{border-left:2px solid #35e6b1}.settings-nav .nav-label{padding:11px 12px 6px;color:#60738c;font-size:.58rem;text-transform:uppercase;letter-spacing:.13em}.settings-content{display:flex;flex-direction:column;gap:16px}.settings-panel{padding:21px;scroll-margin-top:20px}.panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding-bottom:15px;margin-bottom:17px;border-bottom:1px solid #213149}.panel-heading h2{font-size:.94rem;font-weight:800;margin:0}.panel-heading p{font-size:.66rem;color:#7f91aa;margin:4px 0 0}.panel-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:11px;background:#15263c;color:#3ee1b0}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field label{display:block;color:#8395ad;font-size:.65rem;margin-bottom:7px}.field input,.field select{width:100%;height:43px;background:#09131f;border:1px solid #293d56;color:#fff;border-radius:10px;padding:0 12px;outline:none;font-size:.73rem}.field input:focus,.field select:focus{border-color:#35e6b1;box-shadow:0 0 0 3px #35e6b111}.field.full{grid-column:span 2}.range-head{display:flex;justify-content:space-between;font-size:.67rem;color:#8496ae;margin-bottom:9px}.range-head strong{color:#ff7189}.risk-range{width:100%;accent-color:#35e6b1}.form-actions{display:flex;justify-content:flex-end;padding-top:15px;margin-top:16px;border-top:1px solid #213149}.save-button{border:0;background:linear-gradient(90deg,#20c997,#35e6b1);color:#04130f;border-radius:10px;padding:11px 17px;font-size:.69rem;font-weight:900}.save-button.secondary{background:#17263a;color:#42dfb1;border:1px solid #2d435c}.toggle-list{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.toggle-item{padding:13px;border:1px solid #26394f;background:#0b1523;border-radius:12px}.toggle-item label{display:flex;justify-content:space-between;gap:10px;font-size:.7rem;font-weight:750}.toggle-item p{color:#6f829b;font-size:.6rem;line-height:1.45;margin:7px 0 0}.toggle-item input{accent-color:#35e6b1}.integration-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.integration{padding:14px;border:1px solid #283b53;background:#0b1523;border-radius:13px}.integration-top{display:flex;justify-content:space-between;gap:10px}.integration h3{font-size:.73rem;font-weight:800;margin:0}.integration p{color:#71849c;font-size:.61rem;margin:5px 0 12px}.status-dot{width:9px;height:9px;border-radius:50%;background:#ff6079;box-shadow:0 0 10px #ff607966}.status-dot.ready{background:#35e6b1;box-shadow:0 0 10px #35e6b177}.integration-state{display:flex;justify-content:space-between;color:#778aa3;font-size:.6rem}.integration-state strong{color:#9fb2ca}.system-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.system-stat{padding:14px;border:1px solid #26394f;background:#0b1523;border-radius:12px}.system-stat span{color:#74869f;font-size:.61rem}.system-stat strong{display:block;font-size:1.25rem;margin-top:4px}.security-info{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px}.security-item{padding:12px;border:1px solid #26394f;background:#0b1523;border-radius:11px}.security-item span{display:block;color:#72859e;font-size:.61rem}.security-item strong{display:block;font-size:.7rem;margin-top:4px;word-break:break-all}.guest-note{padding:18px;text-align:center;border:1px dashed #33475f;border-radius:12px;color:#8396ae;font-size:.72rem}.guest-note a{color:#3ee3b1}.danger-note{color:#74879f;font-size:.61rem;line-height:1.5;margin-top:12px}
+    @media(max-width:1000px){.settings-layout{grid-template-columns:1fr}.settings-nav{position:static;display:flex;overflow:auto}.settings-nav .nav-label{display:none}.settings-nav a{white-space:nowrap}.toggle-list,.system-stats{grid-template-columns:1fr 1fr}}@media(max-width:650px){.settings-head{align-items:flex-start;flex-direction:column}.form-grid,.integration-grid,.security-info,.toggle-list,.system-stats{grid-template-columns:1fr}.field.full{grid-column:auto}}
+</style>
+<div class="settings-page">
+    <header class="settings-head"><div><div class="settings-kicker">Control & Governance</div><h1>System Configuration Center</h1><p>Kelola profil, preferensi intelligence, keamanan, dan kesiapan integrasi.</p></div><div class="system-pill"><i></i>Core services operational</div></header>
+    @if(session('success'))<div class="flash success">✓ {{ session('success') }}</div>@endif
+    @if($errors->any())<div class="flash error">{{ $errors->first() }}</div>@endif
+    <div class="settings-layout">
+        <nav class="settings-nav"><div class="nav-label">Workspace</div><a class="active" href="#profile">👤 Account Profile</a><a href="#preferences">⚙ Operational Rules</a><a href="#notifications">🔔 Notifications</a><div class="nav-label">Platform</div><a href="#integrations">⌁ Integrations</a><a href="#security">◆ Security</a><a href="#system">◫ System Health</a></nav>
+        <main class="settings-content">
+            <section class="settings-panel" id="profile"><div class="panel-heading"><div><h2>Account Profile</h2><p>Identitas pengguna yang tampil pada workspace dan aktivitas sistem.</p></div><div class="panel-icon">👤</div></div>
+                @auth<form method="POST" action="{{ route('settings.profile') }}">@csrf @method('PATCH')<div class="form-grid"><div class="field"><label>Nama lengkap</label><input name="name" value="{{ old('name',auth()->user()->name) }}" required></div><div class="field"><label>Alamat email</label><input type="email" name="email" value="{{ old('email',auth()->user()->email) }}" required></div><div class="field"><label>Peran akses</label><input value="{{ auth()->user()->is_admin ? 'Administrator' : 'Standard Analyst' }}" disabled></div><div class="field"><label>User ID</label><input value="USR-{{ str_pad(auth()->id(),5,'0',STR_PAD_LEFT) }}" disabled></div></div><div class="form-actions"><button class="save-button">Simpan profil</button></div></form>@else<div class="guest-note">Masuk ke akun untuk mengubah profil. <a href="{{ route('login') }}">Buka halaman login</a></div>@endauth
+            </section>
+            <form method="POST" action="{{ route('settings.preferences') }}">@csrf @method('PATCH')
+                <section class="settings-panel" id="preferences"><div class="panel-heading"><div><h2>Operational Intelligence Rules</h2><p>Atur sensitivitas peringatan dan perilaku refresh pada workspace.</p></div><div class="panel-icon">⚙</div></div><div class="form-grid"><div class="field full"><div class="range-head"><span>Ambang batas risiko tinggi</span><strong><span id="riskValue">{{ $preferences['risk_threshold'] }}</span> / 100</strong></div><input class="risk-range" id="riskThreshold" name="risk_threshold" type="range" min="35" max="90" value="{{ $preferences['risk_threshold'] }}"></div><div class="field"><label>Interval refresh intelligence</label><select name="refresh_interval">@foreach([5,10,15,30,60] as $minute)<option value="{{ $minute }}" @selected($preferences['refresh_interval']===$minute)>Setiap {{ $minute }} menit</option>@endforeach</select></div><div class="field"><label>Zona waktu operasional</label><select name="timezone">@foreach(['Asia/Jakarta'=>'Jakarta (WIB)','Asia/Singapore'=>'Singapore (SGT)','UTC'=>'UTC','Europe/London'=>'London','America/New_York'=>'New York'] as $value=>$label)<option value="{{ $value }}" @selected($preferences['timezone']===$value)>{{ $label }}</option>@endforeach</select></div><div class="field"><label>Mata uang dasar</label><select name="base_currency">@foreach(['USD','EUR','IDR','SGD','GBP'] as $currency)<option @selected($preferences['base_currency']===$currency)>{{ $currency }}</option>@endforeach</select></div><div class="field"><label>Kepadatan tampilan</label><select name="density"><option value="comfortable" @selected($preferences['density']==='comfortable')>Comfortable</option><option value="compact" @selected($preferences['density']==='compact')>Compact</option></select></div></div></section>
+                <section class="settings-panel" id="notifications"><div class="panel-heading"><div><h2>Alert & Notification Policy</h2><p>Tentukan kanal informasi untuk kejadian supply chain penting.</p></div><div class="panel-icon">🔔</div></div><div class="toggle-list"><div class="toggle-item"><label>Email risk alert<input type="checkbox" name="email_alerts" value="1" @checked($preferences['email_alerts'])></label><p>Kirim email saat skor melewati threshold.</p></div><div class="toggle-item"><label>Browser alert<input type="checkbox" name="browser_alerts" value="1" @checked($preferences['browser_alerts'])></label><p>Tampilkan notifikasi pada perangkat aktif.</p></div><div class="toggle-item"><label>Weekly digest<input type="checkbox" name="weekly_digest" value="1" @checked($preferences['weekly_digest'])></label><p>Ringkasan risiko dan tren setiap minggu.</p></div></div>@auth<div class="form-actions"><button class="save-button">Simpan preferensi</button></div>@else<div class="guest-note" style="margin-top:15px">Login diperlukan untuk menyimpan preferensi.</div>@endauth</section>
+            </form>
+            <section class="settings-panel" id="integrations"><div class="panel-heading"><div><h2>Integration Registry</h2><p>Status konfigurasi layanan eksternal tanpa mengekspos credential.</p></div><div class="panel-icon">⌁</div></div><div class="integration-grid">@foreach($integrations as $integration)<article class="integration"><div class="integration-top"><h3>{{ $integration['name'] }}</h3><i class="status-dot {{ $integration['ready'] ? 'ready' : '' }}"></i></div><p>{{ $integration['description'] }}</p><div class="integration-state"><span>{{ $integration['ready'] ? 'READY' : 'ACTION REQUIRED' }}</span><strong>{{ $integration['label'] }}</strong></div></article>@endforeach</div><p class="danger-note">Credential dikelola melalui file environment server. Nilai API key tidak pernah ditampilkan atau dikirim ke halaman ini.</p></section>
+            <section class="settings-panel" id="security"><div class="panel-heading"><div><h2>Security & Access</h2><p>Perbarui password dan tinjau sesi perangkat saat ini.</p></div><div class="panel-icon">◆</div></div>@auth<div class="security-info"><div class="security-item"><span>Alamat IP sesi</span><strong>{{ request()->ip() }}</strong></div><div class="security-item"><span>Perangkat aktif</span><strong>{{ Str::limit(request()->userAgent(),70) }}</strong></div></div><form method="POST" action="{{ route('settings.password') }}">@csrf @method('PATCH')<div class="form-grid"><div class="field full"><label>Password saat ini</label><input type="password" name="current_password" autocomplete="current-password" required></div><div class="field"><label>Password baru</label><input type="password" name="password" autocomplete="new-password" required></div><div class="field"><label>Konfirmasi password</label><input type="password" name="password_confirmation" autocomplete="new-password" required></div></div><div class="form-actions"><button class="save-button secondary">Perbarui password</button></div></form>@else<div class="guest-note">Informasi keamanan tersedia setelah login.</div>@endauth</section>
+            <section class="settings-panel" id="system"><div class="panel-heading"><div><h2>System Health Snapshot</h2><p>Ringkasan volume data utama yang tersedia saat ini.</p></div><div class="panel-icon">◫</div></div><div class="system-stats"><article class="system-stat"><span>Negara & teritori</span><strong>{{ number_format($systemStats['countries']) }}</strong></article><article class="system-stat"><span>Pelabuhan</span><strong>{{ number_format($systemStats['ports']) }}</strong></article><article class="system-stat"><span>Risk snapshots</span><strong>{{ number_format($systemStats['risks']) }}</strong></article><article class="system-stat"><span>News cache feeds</span><strong>{{ number_format($systemStats['news']) }}</strong></article></div></section>
+        </main>
     </div>
 </div>
+<script>document.addEventListener('DOMContentLoaded',()=>{const range=document.getElementById('riskThreshold'),value=document.getElementById('riskValue');range?.addEventListener('input',()=>value.textContent=range.value);const links=[...document.querySelectorAll('.settings-nav a')];links.forEach(link=>link.addEventListener('click',()=>{links.forEach(x=>x.classList.remove('active'));link.classList.add('active')}))});</script>
 @endsection

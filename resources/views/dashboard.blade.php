@@ -1,118 +1,103 @@
 @extends('layouts.app')
 
 @section('content')
-<!-- Header Konten -->
-<div class="flex justify-between items-center mb-8">
-    <div>
-        <h2 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-            🛡️ Risk Intelligence Command Center
-        </h2>
-        <p class="text-sm text-gray-400 mt-1">Overview of global logistics threats and operational security indices</p>
-    </div>
+@php
+    $latestRisk = $selected?->riskScores?->first();
+    $weather = $selected?->weatherSnapshots?->first();
+    $economy = $selected?->economicIndicators ?? collect();
+    $currencies = $selected?->currencySnapshots ?? collect();
+    $riskScore = (float) ($latestRisk?->total_score ?? 0);
+    $riskStatus = $latestRisk?->status ?? 'Belum dinilai';
+    $riskColor = $riskScore >= 70 ? '#fb5d77' : ($riskScore >= 40 ? '#fbbf24' : '#35e6b1');
+    $latestEconomy = $economy->last();
+    $countryCode = strtolower($selected?->code_iso2 ?? 'id');
+    $economicLabels = $economy->pluck('year')->values();
+    $gdpData = $economy->pluck('gdp')->map(fn ($value) => $value === null ? null : round((float) $value / 1000000000, 2))->values();
+    $inflationData = $economy->pluck('inflation')->map(fn ($value) => $value === null ? null : (float) $value)->values();
+    $currencyLabels = $currencies->map(fn ($item) => optional($item->observed_at)->format('d M') ?? '—')->values();
+    $currencyData = $currencies->pluck('rate')->map(fn ($value) => $value === null ? null : (float) $value)->values();
+    $riskLabels = collect($latestRisk ? ['Cuaca', 'Inflasi', 'Kurs', 'Berita'] : []);
+    $riskParts = collect($latestRisk ? [$latestRisk->weather_risk, $latestRisk->inflation_risk, $latestRisk->currency_risk, $latestRisk->news_risk] : []);
+    $positive = (int) ($sentiments['Positive'] ?? 0);
+    $neutral = (int) ($sentiments['Neutral'] ?? 0);
+    $negative = (int) ($sentiments['Negative'] ?? 0);
+    $visualArticles = collect($articles)->filter(fn ($article) => filled($article['image'] ?? null))->values();
+@endphp
+
+<style>
+    .command-page{--panel:#101827;--panel2:#0d1421;--line:#223149;--muted:#8290a8;--cyan:#37c8ff;--green:#35e6b1;--violet:#9878ff;color:#eef5ff;min-height:100vh;padding:30px 34px 48px}
+    .command-page *{box-sizing:border-box}.command-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:24px}.eyebrow{color:var(--green);font-size:.72rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase}.command-head h1{font-size:clamp(1.8rem,3vw,2.7rem);font-weight:850;letter-spacing:-.04em;margin:6px 0}.command-head p{color:#91a3bd;margin:0}.live-pill,.outline-pill{border:1px solid #29405b;background:#0c1523;border-radius:999px;padding:9px 14px;color:#c7d4e8;font-size:.78rem;white-space:nowrap}.live-pill i{display:inline-block;width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 14px var(--green);margin-right:8px}
+    .stats-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-bottom:16px}.stat-card,.panel{background:linear-gradient(145deg,rgba(17,27,44,.96),rgba(10,16,27,.98));border:1px solid var(--line);box-shadow:0 16px 45px rgba(0,0,0,.18);border-radius:18px}.stat-card{padding:17px;display:flex;align-items:center;gap:13px;min-height:96px;position:relative;overflow:hidden}.stat-card:after{content:"";position:absolute;width:90px;height:90px;border-radius:50%;background:var(--accent);filter:blur(55px);opacity:.17;right:-24px;top:-20px}.stat-icon{width:45px;height:45px;border-radius:14px;display:grid;place-items:center;font-size:1.15rem;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}.stat-label{font-size:.72rem;color:var(--muted)}.stat-value{font-size:1.55rem;font-weight:850;margin-top:2px}.stat-note{font-size:.67rem;color:var(--accent)}
+    .dashboard-grid{display:grid;grid-template-columns:1.05fr 1.4fr .92fr;gap:16px;margin-bottom:16px}.panel{padding:20px;min-width:0}.panel-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:17px}.panel-title h2{font-size:.96rem;font-weight:750;margin:0}.panel-title a{font-size:.72rem;color:var(--green);text-decoration:none}.mini-label{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+    .country-select{width:100%;background:#0a111d;color:#eff6ff;border:1px solid #293953;border-radius:11px;padding:10px 12px;outline:none}.country-hero{display:flex;gap:15px;align-items:center;margin:18px 0}.flag-card{width:104px;height:70px;object-fit:cover;border-radius:13px;border:1px solid #34435a;background:#fff}.country-hero h3{font-size:1.24rem;margin:0 0 4px}.country-hero p{margin:0;color:var(--muted);font-size:.76rem}.country-detail{display:grid;grid-template-columns:1fr 1fr;gap:8px}.detail{padding:9px 10px;background:#0a111c;border:1px solid #1d2a3d;border-radius:10px}.detail span{display:block;color:var(--muted);font-size:.65rem;margin-bottom:3px}.detail strong{font-size:.77rem;font-weight:650}.risk-row{display:flex;align-items:center;gap:20px;margin-top:17px;padding-top:16px;border-top:1px solid #1f2c40}.risk-gauge{width:94px;height:94px;border-radius:50%;display:grid;place-items:center;background:conic-gradient({{ $riskColor }} {{ min($riskScore,100) * 3.6 }}deg,#1d293a 0);position:relative}.risk-gauge:after{content:"";position:absolute;inset:10px;background:#0d1522;border-radius:50%}.risk-gauge div{z-index:1;text-align:center}.risk-gauge strong{font-size:1.42rem;display:block}.risk-gauge span{font-size:.58rem;color:var(--muted)}.weather-now strong{font-size:1.1rem}.weather-now p{font-size:.72rem;color:var(--muted);margin:4px 0}.status{color:{{ $riskColor }};font-weight:750;font-size:.78rem}
+    #dashboardMap{height:348px;width:100%;border-radius:14px;background:#080d15;overflow:hidden;isolation:isolate}.leaflet-container{font-family:inherit}.leaflet-container .leaflet-tile{width:256px!important;height:256px!important;max-width:none!important;max-height:none!important;filter:invert(1) hue-rotate(180deg) brightness(.52) saturate(.6) contrast(1.18)}.leaflet-container img.leaflet-marker-icon,.leaflet-container img.leaflet-marker-shadow{max-width:none!important}.map-panel{padding-bottom:14px;overflow:hidden}.map-caption{display:flex;justify-content:space-between;color:var(--muted);font-size:.68rem;margin-top:10px}.news-list{display:flex;flex-direction:column;gap:11px}.news-item{display:grid;grid-template-columns:72px 1fr;gap:11px;padding-bottom:11px;border-bottom:1px solid #1c293b;text-decoration:none;color:inherit}.news-item:last-child{border:0}.news-image{width:72px;height:56px;object-fit:cover;border-radius:9px;background:#152236}.news-item h3{font-size:.72rem;line-height:1.35;margin:0 0 6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.news-meta{display:flex;align-items:center;justify-content:space-between;font-size:.62rem;color:var(--muted)}.sentiment{padding:3px 7px;border-radius:99px;font-weight:700}.sentiment.positive{background:#123c30;color:#4af1ba}.sentiment.negative{background:#431c2a;color:#ff7890}.sentiment.neutral{background:#42361a;color:#ffd369}.empty-state{min-height:180px;display:grid;place-items:center;text-align:center;color:var(--muted);font-size:.78rem}
+    .visual-news{display:grid;grid-template-columns:1.35fr 1fr;grid-template-rows:1fr 1fr;gap:12px;height:348px}.visual-story{position:relative;overflow:hidden;border-radius:14px;border:1px solid #24344b;background:linear-gradient(135deg,#14233a,#09111d);color:#fff;text-decoration:none;min-height:0}.visual-story:first-child{grid-row:span 2}.visual-story img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}.visual-story:hover img{transform:scale(1.04)}.visual-story:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 25%,rgba(4,8,15,.96) 100%)}.visual-copy{position:absolute;z-index:2;left:15px;right:15px;bottom:14px}.visual-copy h3{font-size:.78rem;line-height:1.35;font-weight:750;margin:7px 0 0}.visual-story:first-child .visual-copy h3{font-size:1.05rem}.visual-source{font-size:.62rem;color:#b8c8dc}.sentiment-overview{display:flex;flex-direction:column;gap:13px}.sentiment-total{text-align:center;padding:20px 10px;border-radius:14px;background:radial-gradient(circle at center,rgba(152,120,255,.18),transparent 68%)}.sentiment-total strong{font-size:2.2rem;display:block}.sentiment-total span{font-size:.7rem;color:var(--muted)}.sentiment-meter{height:9px;display:flex;overflow:hidden;border-radius:99px;background:#172234}.sentiment-meter i{height:100%}.sentiment-row{display:flex;justify-content:space-between;align-items:center;font-size:.74rem;padding:8px 0;border-bottom:1px solid #1d2a3c}.sentiment-key{display:flex;align-items:center;gap:8px}.sentiment-key i{width:8px;height:8px;border-radius:50%}
+    .wide{grid-column:span 2}.chart-box{height:260px}.risk-table{width:100%;border-collapse:collapse}.risk-table th{font-size:.64rem;color:var(--muted);text-align:left;font-weight:500;padding:0 8px 9px}.risk-table td{font-size:.74rem;padding:10px 8px;border-top:1px solid #1b2839}.score-cell{display:flex;align-items:center;gap:9px}.score-bar{height:5px;flex:1;min-width:50px;background:#202d40;border-radius:9px;overflow:hidden}.score-bar i{display:block;height:100%;border-radius:inherit}.risk-badge{border-radius:99px;padding:4px 8px;font-size:.62rem;font-weight:750}.risk-badge.high{background:#421d29;color:#ff758c}.risk-badge.medium{background:#403417;color:#fbc84e}.risk-badge.low{background:#123b2f;color:#44eab3}.intel-grid{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:10px}.donut-box{height:180px}.intel-list{display:flex;flex-direction:column;gap:10px}.intel-list div{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted)}.intel-list strong{color:#eff6ff}.no-data{color:var(--muted);font-size:.76rem;padding:50px 0;text-align:center}
+    @media(max-width:1280px){.stats-grid{grid-template-columns:repeat(3,1fr)}.dashboard-grid{grid-template-columns:1fr 1fr}.news-panel{grid-column:span 2}}@media(max-width:800px){.command-page{padding:22px 16px}.command-head{align-items:flex-start;flex-direction:column}.stats-grid,.dashboard-grid{grid-template-columns:1fr}.wide,.news-panel{grid-column:auto}.stats-grid{grid-template-columns:1fr 1fr}.country-detail{grid-template-columns:1fr}.intel-grid{grid-template-columns:1fr}}
+</style>
+
+<div class="command-page">
+    <header class="command-head">
+        <div><div class="eyebrow">Live Intelligence Network</div><h1>Supply Chain Command Center</h1><p>Pantau risiko global, ekonomi, cuaca, kurs, pelabuhan, dan berita dalam satu layar.</p></div>
+        <div class="live-pill"><i></i>Data operasional aktif</div>
+    </header>
+
+    <section class="stats-grid">
+        <article class="stat-card" style="--accent:#37c8ff"><div class="stat-icon">◎</div><div><div class="stat-label">Negara & teritori</div><div class="stat-value">{{ $countryCount >= 250 ? '250+' : number_format($countryCount) }}</div><div class="stat-note">{{ number_format($countryCount) }} wilayah dalam database</div></div></article>
+        <article class="stat-card" style="--accent:#35e6b1"><div class="stat-icon">◇</div><div><div class="stat-label">Rata-rata risiko</div><div class="stat-value">{{ number_format($averageRisk,1) }}</div><div class="stat-note">Skor komposit</div></div></article>
+        <article class="stat-card" style="--accent:#ff6f85"><div class="stat-icon">ϟ</div><div><div class="stat-label">Peringatan risiko tinggi</div><div class="stat-value">{{ $highRisk }}</div><div class="stat-note">Perlu perhatian</div></div></article>
+        <article class="stat-card" style="--accent:#9878ff"><div class="stat-icon">◫</div><div><div class="stat-label">Berita hari ini</div><div class="stat-value">{{ count($articles) }}</div><div class="stat-note">GNews intelligence</div></div></article>
+        <article class="stat-card" style="--accent:#fbbf24"><div class="stat-icon">⚓</div><div><div class="stat-label">Pelabuhan termonitor</div><div class="stat-value">{{ number_format($portCount) }}</div><div class="stat-note">World Port Index + UN/LOCODE</div></div></article>
+    </section>
+
+    <section class="dashboard-grid">
+        <article class="panel">
+            <div class="panel-title"><h2>Fokus Negara</h2><span class="mini-label">Live snapshot</span></div>
+            <form method="GET"><select class="country-select" name="country" onchange="this.form.submit()">@foreach($countries as $country)<option value="{{ $country->code_iso2 }}" @selected($selected?->id === $country->id)>{{ $country->name }} · {{ $country->code_iso2 }}</option>@endforeach</select></form>
+            @if($selected)
+                <div class="country-hero"><img class="flag-card" src="https://flagcdn.com/w160/{{ $countryCode }}.png" alt="Bendera {{ $selected->name }}"><div><h3>{{ $selected->name }}</h3><p>{{ $selected->region ?: 'Wilayah belum tersedia' }}</p><p>{{ $selected->currency_code ?: '—' }} · {{ $selected->capital ?: 'Ibu kota belum tersedia' }}</p></div></div>
+                <div class="country-detail">
+                    <div class="detail"><span>Populasi</span><strong>{{ $latestEconomy?->population ? number_format($latestEconomy->population) : '—' }}</strong></div>
+                    <div class="detail"><span>GDP</span><strong>{{ $latestEconomy?->gdp ? '$'.number_format($latestEconomy->gdp / 1000000000,1).' B' : '—' }}</strong></div>
+                    <div class="detail"><span>Inflasi</span><strong>{{ $latestEconomy?->inflation !== null ? number_format($latestEconomy->inflation,2).'%' : '—' }}</strong></div>
+                    <div class="detail"><span>Kurs / USD</span><strong>{{ $currencies->last()?->rate ? number_format($currencies->last()->rate,2) : '—' }}</strong></div>
+                </div>
+                <div class="risk-row"><div class="risk-gauge"><div><strong>{{ round($riskScore) }}</strong><span>RISK SCORE</span></div></div><div class="weather-now"><span class="mini-label">Kondisi terbaru</span><p><strong>{{ $weather?->temp !== null ? number_format($weather->temp,1).'°C' : 'Data cuaca —' }}</strong></p><p>Angin {{ $weather?->wind_speed !== null ? number_format($weather->wind_speed,1).' km/j' : '—' }}</p><div class="status">{{ $riskStatus }}</div></div></div>
+            @else<div class="empty-state">Sinkronkan negara untuk menampilkan intelligence snapshot.</div>@endif
+        </article>
+
+        <article class="panel">
+            <div class="panel-title"><h2>Global Intelligence Feed</h2><a href="{{ route('news') }}">Buka semua berita →</a></div>
+            @if($visualArticles->count())
+                <div class="visual-news">@foreach($visualArticles->take(3) as $article)@php $label = strtolower($article['sentiment']['label'] ?? 'neutral'); @endphp<a class="visual-story" href="{{ $article['url'] ?? '#' }}" target="_blank" rel="noopener"><img src="{{ $article['image'] }}" alt="{{ $article['title'] ?? 'Berita global' }}" onerror="this.style.display='none'"><div class="visual-copy"><span class="sentiment {{ $label }}">{{ ucfirst($label) }}</span><h3>{{ $article['title'] ?? 'Supply chain intelligence update' }}</h3><span class="visual-source">{{ $article['source']['name'] ?? 'GNews' }}</span></div></a>@endforeach</div>
+            @else<div class="empty-state">Belum ada berita bergambar dari GNews.</div>@endif
+        </article>
+
+        <article class="panel news-panel">
+            <div class="panel-title"><h2>Sentiment Radar</h2><span class="mini-label">GNews analysis</span></div>
+            @php $sentimentTotal = max($positive + $neutral + $negative, 1); @endphp
+            <div class="sentiment-overview"><div class="sentiment-total"><strong>{{ $positive + $neutral + $negative }}</strong><span>Artikel dianalisis saat ini</span></div><div class="sentiment-meter"><i style="width:{{ $positive/$sentimentTotal*100 }}%;background:#35e6b1"></i><i style="width:{{ $neutral/$sentimentTotal*100 }}%;background:#fbbf24"></i><i style="width:{{ $negative/$sentimentTotal*100 }}%;background:#ff6079"></i></div><div class="sentiment-row"><span class="sentiment-key"><i style="background:#35e6b1"></i>Positif</span><strong>{{ $positive }}</strong></div><div class="sentiment-row"><span class="sentiment-key"><i style="background:#fbbf24"></i>Netral</span><strong>{{ $neutral }}</strong></div><div class="sentiment-row"><span class="sentiment-key"><i style="background:#ff6079"></i>Negatif</span><strong>{{ $negative }}</strong></div></div>
+        </article>
+    </section>
+
+    <section class="dashboard-grid">
+        <article class="panel wide"><div class="panel-title"><h2>Economic Pulse · {{ $selected?->name ?? '—' }}</h2><span class="outline-pill">GDP & Inflasi</span></div>@if($economy->count())<div class="chart-box"><canvas id="economyChart"></canvas></div>@else<div class="no-data">Data ekonomi belum tersedia untuk negara ini.</div>@endif</article>
+        <article class="panel"><div class="panel-title"><h2>Currency Momentum</h2><span class="mini-label">vs USD</span></div>@if($currencies->count())<div class="chart-box"><canvas id="currencyChart"></canvas></div>@else<div class="no-data">Belum ada histori kurs.</div>@endif</article>
+
+        <article class="panel wide"><div class="panel-title"><h2>Negara dengan Risiko Tertinggi</h2><a href="{{ route('risk') }}">Analisis lengkap →</a></div><table class="risk-table"><thead><tr><th>Negara</th><th>Skor</th><th>Status</th></tr></thead><tbody>@forelse($scores->sortByDesc('total_score')->take(7) as $score)@php $level = $score->total_score >= 70 ? 'high' : ($score->total_score >= 40 ? 'medium' : 'low'); $bar = $level === 'high' ? '#ff6079' : ($level === 'medium' ? '#fbc34d' : '#39e3ac'); @endphp<tr><td>{{ $score->country?->name ?? '—' }}</td><td><div class="score-cell"><strong>{{ round($score->total_score) }}</strong><span class="score-bar"><i style="width:{{ min($score->total_score,100) }}%;background:{{ $bar }}"></i></span></div></td><td><span class="risk-badge {{ $level }}">{{ $score->status }}</span></td></tr>@empty<tr><td colspan="3" class="no-data">Belum ada skor risiko.</td></tr>@endforelse</tbody></table></article>
+        <article class="panel"><div class="panel-title"><h2>Intelligence Mix</h2><span class="mini-label">Sentimen berita</span></div><div class="intel-grid"><div class="donut-box"><canvas id="sentimentChart"></canvas></div><div class="intel-list"><div><span>Positif</span><strong>{{ $positive }}</strong></div><div><span>Netral</span><strong>{{ $neutral }}</strong></div><div><span>Negatif</span><strong>{{ $negative }}</strong></div><div><span>Cuaca ekstrem</span><strong>{{ $extremeWeather }}</strong></div></div></div>@if($latestRisk)<div class="chart-box" style="height:150px;margin-top:8px"><canvas id="riskChart"></canvas></div>@endif</article>
+    </section>
 </div>
 
-<!-- Grid Kartu Statistik Utama -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <!-- Stat 1 -->
-    <div class="bg-[#111827] border border-gray-800/80 rounded-xl p-5">
-        <span class="text-xs text-gray-500 font-semibold uppercase tracking-wider block">Global Countries</span>
-        <div class="flex items-baseline gap-2 mt-2">
-            <span class="text-3xl font-bold text-white">247</span>
-            <span class="text-[10px] bg-emerald-950/40 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-900/40 font-medium">Mapped</span>
-        </div>
-    </div>
-    <!-- Stat 2 -->
-    <div class="bg-[#111827] border border-gray-800/80 rounded-xl p-5">
-        <span class="text-xs text-gray-500 font-semibold uppercase tracking-wider block">Monitored Ports</span>
-        <div class="flex items-baseline gap-2 mt-2">
-            <span class="text-3xl font-bold text-white">1,840</span>
-            <span class="text-xs text-gray-400">Hubs</span>
-        </div>
-    </div>
-    <!-- Stat 3 -->
-    <div class="bg-[#111827] border border-gray-800/80 rounded-xl p-5">
-        <span class="text-xs text-gray-500 font-semibold uppercase tracking-wider block">System Incidents</span>
-        <div class="flex items-baseline gap-2 mt-2">
-            <span class="text-3xl font-bold text-rose-500 animate-pulse">14</span>
-            <span class="text-[10px] bg-rose-950/40 text-rose-400 px-1.5 py-0.5 rounded border border-rose-900/40 font-medium">Active Alerts</span>
-        </div>
-    </div>
-    <!-- Stat 4 -->
-    <div class="bg-[#111827] border border-gray-800/80 rounded-xl p-5">
-        <span class="text-xs text-gray-500 font-semibold uppercase tracking-wider block">Average Risk Index</span>
-        <div class="flex items-baseline gap-2 mt-2">
-            <span class="text-3xl font-bold text-amber-400">24.50</span>
-            <span class="text-[10px] bg-amber-950/40 text-amber-400 px-1.5 py-0.5 rounded border border-amber-900/40 font-medium">Medium</span>
-        </div>
-    </div>
-</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    Chart.defaults.color = '#8290a8'; Chart.defaults.borderColor = 'rgba(130,144,168,.12)'; Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+    const common = {responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false}, plugins:{legend:{labels:{usePointStyle:true,boxWidth:7,padding:18}}}, scales:{x:{grid:{display:false},ticks:{maxRotation:0}},y:{grid:{color:'rgba(130,144,168,.09)'}}}};
+    const economyEl=document.getElementById('economyChart'); if(economyEl)new Chart(economyEl,{type:'line',data:{labels:{{ Illuminate\Support\Js::from($economicLabels) }},datasets:[{label:'GDP (US$ B)',data:{{ Illuminate\Support\Js::from($gdpData) }},borderColor:'#37c8ff',backgroundColor:'rgba(55,200,255,.12)',fill:true,tension:.38,pointRadius:3},{label:'Inflasi %',data:{{ Illuminate\Support\Js::from($inflationData) }},borderColor:'#fbbf24',tension:.38,pointRadius:3,yAxisID:'y1'}]},options:{...common,scales:{...common.scales,y1:{position:'right',grid:{display:false}}}}});
+    const currencyEl=document.getElementById('currencyChart'); if(currencyEl)new Chart(currencyEl,{type:'line',data:{labels:{{ Illuminate\Support\Js::from($currencyLabels) }},datasets:[{label:'Rate / USD',data:{{ Illuminate\Support\Js::from($currencyData) }},borderColor:'#9878ff',backgroundColor:'rgba(152,120,255,.16)',fill:true,tension:.42,pointRadius:2}]},options:common});
+    const sentimentEl=document.getElementById('sentimentChart'); if(sentimentEl)new Chart(sentimentEl,{type:'doughnut',data:{labels:['Positif','Netral','Negatif'],datasets:[{data:[{{ $positive }},{{ $neutral }},{{ $negative }}],backgroundColor:['#35e6b1','#fbbf24','#ff6079'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false}}}});
+    const riskEl=document.getElementById('riskChart'); if(riskEl)new Chart(riskEl,{type:'bar',data:{labels:{{ Illuminate\Support\Js::from($riskLabels) }},datasets:[{data:{{ Illuminate\Support\Js::from($riskParts) }},backgroundColor:['#37c8ff','#fbbf24','#9878ff','#ff6079'],borderRadius:7}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{display:false,max:100},y:{grid:{display:false}}}}});
 
-<!-- Layout Dua Kolom Tengah -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Kolom Kiri: Ringkasan Engine & Comparison Quick Check -->
-    <div class="space-y-6 lg:col-span-1">
-        <div class="bg-[#111827] border border-gray-800/80 rounded-xl p-6">
-            <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-gray-800 pb-3 mb-4">
-                Comparison Engine
-            </h3>
-            <p class="text-xs text-gray-400 mb-4">Quickly compare metrics between key trading nodes.</p>
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-[10px] uppercase font-bold text-gray-500 mb-1">Country A</label>
-                    <select class="w-full bg-[#0B0F17] border border-gray-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none">
-                        <option>🇮🇩 Indonesia</option>
-                        <option>🇸🇬 Singapore</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-[10px] uppercase font-bold text-gray-500 mb-1">Country B</label>
-                    <select class="w-full bg-[#0B0F17] border border-gray-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none">
-                        <option>🇩🇿 Algeria</option>
-                        <option>🇺🇦 Ukraine</option>
-                    </select>
-                </div>
-                <a href="/compare" class="block text-center w-full mt-4 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg transition">
-                    Run Analysis
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Kolom Kanan: Berita & Sentimen Logistik Terkini -->
-    <div class="lg:col-span-2 bg-[#111827] border border-gray-800/80 rounded-xl p-6">
-        <div class="flex justify-between items-center border-b border-gray-800 pb-3 mb-4">
-            <h3 class="text-sm font-bold text-white uppercase tracking-wider">
-                Live Supply Chain Threat Feed
-            </h3>
-            <span class="flex items-center gap-1.5 text-[10px] text-emerald-400 font-semibold bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-900/30">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Live Streaming
-            </span>
-        </div>
-        
-        <div class="space-y-4">
-            <!-- Feed 1 -->
-            <div class="p-3.5 bg-[#0B0F17] rounded-lg border border-gray-800/60 flex flex-col justify-between gap-2">
-                <div class="flex justify-between items-start gap-4">
-                    <h4 class="text-xs font-bold text-gray-200 hover:text-emerald-400 cursor-pointer">Suez Canal congestion increases container freight transit delays by 48 hours</h4>
-                    <span class="text-[10px] bg-rose-950/40 text-rose-400 font-bold px-2 py-0.5 rounded whitespace-nowrap border border-rose-900/40">Negative</span>
-                </div>
-                <div class="flex justify-between items-center text-[10px] text-gray-500">
-                    <span>Source: Maritime Intelligence</span>
-                    <span>12 mins ago</span>
-                </div>
-            </div>
-            <!-- Feed 2 -->
-            <div class="p-3.5 bg-[#0B0F17] rounded-lg border border-gray-800/60 flex flex-col justify-between gap-2">
-                <div class="flex justify-between items-start gap-4">
-                    <h4 class="text-xs font-bold text-gray-200 hover:text-emerald-400 cursor-pointer">Port of Singapore rolls out automated AI berth planning infrastructure</h4>
-                    <span class="text-[10px] bg-emerald-950/40 text-emerald-400 font-bold px-2 py-0.5 rounded whitespace-nowrap border border-emerald-900/40">Positive</span>
-                </div>
-                <div class="flex justify-between items-center text-[10px] text-gray-500">
-                    <span>Source: TechLogistics Asia</span>
-                    <span>1 hour ago</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+});
+</script>
 @endsection

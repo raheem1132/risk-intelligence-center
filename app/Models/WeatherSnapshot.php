@@ -1,0 +1,4 @@
+<?php
+namespace App\Models;
+use Illuminate\Database\Eloquent\Model;
+class WeatherSnapshot extends Model { protected $guarded = []; protected $casts = ['observed_at'=>'datetime']; }

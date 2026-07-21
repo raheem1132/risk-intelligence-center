@@ -1,412 +1,87 @@
-@extends(view()->exists('layouts.app') ? 'layouts.app' : (view()->exists('dashboard') ? 'dashboard' : 'welcome'))
-
+@extends('layouts.app')
 @section('content')
-<!-- CSS Peta, Marker Cluster & FontAwesome -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
 <style>
-    .peta-flex-container {
-        display: flex !important;
-        flex-direction: row !important;
-        gap: 20px !important;
-        width: 100% !important;
-        align-items: flex-start !important;
-    }
-    
-    .peta-sidebar-kiri {
-        width: 350px !important;
-        flex-shrink: 0 !important;
-    }
-    
-    .peta-box-kanan {
-        flex-grow: 1 !important;
-        width: 100% !important;
-        position: relative;
-    }
-
-    .custom-card {
-        background-color: #11101d !important;
-        border: 1px solid #222133 !important;
-        border-radius: 10px;
-        color: #f8fafc;
-    }
-    .custom-label {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        color: #94a3b8;
-        font-weight: 600;
-        margin-bottom: 5px;
-    }
-    .custom-select {
-        background-color: #1e1b2e !important;
-        color: #f1f5f9 !important;
-        border: 1px solid #332f4c !important;
-        padding: 10px;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        width: 100% !important;
-        display: block;
-    }
-    
-    .transport-group {
-        display: flex;
-        gap: 10px;
-    }
-    .btn-transport {
-        flex: 1;
-        background-color: #1e1b2e;
-        border: 1px solid #332f4c;
-        color: #94a3b8;
-        border-radius: 8px;
-        padding: 12px 5px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    .btn-transport.active, .btn-transport:hover {
-        background-color: #4f46e5 !important;
-        border-color: #6366f1 !important;
-        color: #ffffff !important;
-    }
-
-    .btn-calc {
-        background-color: #4f46e5;
-        color: white;
-        border: none;
-        padding: 12px;
-        border-radius: 8px;
-        font-weight: 600;
-        width: 100%;
-    }
-
-    .result-box {
-        background-color: #1e1b2e;
-        border-radius: 8px;
-        padding: 15px;
-    }
-
-    #map {
-        height: 650px !important;
-        width: 100% !important;
-        border-radius: 10px;
-        border: 1px solid #222133;
-        z-index: 1;
-    }
-
-    /* SEARCH BAR REALTIME DI ATAS PETA */
-    .map-search-container {
-        position: absolute;
-        top: 15px;
-        left: 60px;
-        z-index: 1000;
-        width: 280px;
-    }
-    .map-search-input {
-        width: 100%;
-        padding: 10px 15px;
-        background-color: #11101d !important;
-        border: 2px solid #4f46e5 !important;
-        color: #ffffff !important;
-        border-radius: 25px;
-        font-size: 0.85rem;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    }
-    .map-search-input::placeholder {
-        color: #94a3b8;
-    }
-
-    /* PANEL BUTTON DI MAP */
-    .custom-map-btn {
-        background: #11101d !important;
-        color: #ffffff !important;
-        border: 1px solid #332f4c !important;
-        width: 34px;
-        height: 34px;
-        line-height: 34px;
-        text-align: center;
-        cursor: pointer;
-        font-size: 14px;
-        display: block;
-        border-radius: 4px;
-        box-shadow: 0 1px 5px rgba(0,0,0,0.4);
-    }
-    .custom-map-btn:hover {
-        background: #4f46e5 !important;
-        color: #fff !important;
-    }
+    #map { background:#071018; }
+    .leaflet-control-layers,.leaflet-bar a{background:#111827!important;color:#d1d5db!important;border-color:#334155!important}
+    .leaflet-control-layers label{color:#d1d5db}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#111827;color:#d1d5db}
+    .country-badge{background:#0f172a;border:1px solid #34d399;border-radius:8px;color:#e5e7eb;padding:4px 7px;box-shadow:0 4px 14px #0009;font-size:11px;font-weight:700;white-space:nowrap;width:max-content!important;height:auto!important}
+    .port-dot{width:12px;height:12px;border:2px solid #dbeafe;border-radius:50%;background:#3b82f6;box-shadow:0 0 0 3px #2563eb55,0 3px 8px #000}
+    .port-dot.large{background:#f43f5e;box-shadow:0 0 0 4px #f43f5e44}.port-dot.medium{background:#f59e0b}.marker-cluster div{color:#fff;font-weight:800}.marker-cluster-small,.marker-cluster-medium,.marker-cluster-large{background:#10b98144}.marker-cluster-small div,.marker-cluster-medium div,.marker-cluster-large div{background:#059669}
+    .route-planner{position:absolute;z-index:1001;left:16px;top:16px;width:390px;max-height:calc(100% - 32px);overflow:auto;background:rgba(7,13,23,.96);backdrop-filter:blur(15px);border:1px solid #30425b;border-radius:17px;box-shadow:0 22px 55px #0008;color:#eaf2fc}.planner-head{display:flex;justify-content:space-between;align-items:flex-start;padding:17px;border-bottom:1px solid #223149}.planner-kicker{color:#35e6b1;font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}.planner-head h3{font-size:15px;font-weight:800;margin:4px 0 0}.planner-toggle{border:1px solid #31445e;background:#121f31;color:#9fb0c5;border-radius:8px;width:30px;height:30px}.planner-body{padding:15px}.route-field{margin-bottom:10px}.route-field label{display:block;color:#8294ac;font-size:10px;margin-bottom:6px}.route-field input{width:100%;height:42px;background:#0b1523;border:1px solid #293d56;color:#fff;border-radius:10px;padding:0 11px;outline:none;font-size:12px}.route-field input:focus{border-color:#35e6b1}.cargo-row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.calculate-route{width:100%;border:0;border-radius:10px;background:linear-gradient(90deg,#25d6a1,#32bcec);color:#041410;font-size:11px;font-weight:900;padding:12px;margin-top:3px}.planner-note{color:#64778f;font-size:9px;line-height:1.45;margin:9px 0 0}.route-results{display:none;padding:0 15px 15px}.route-summary{padding:11px;background:#101c2d;border:1px solid #263a52;border-radius:11px;margin-bottom:10px}.route-summary strong{display:block;font-size:14px}.route-summary span{font-size:9px;color:#8295ae}.mode-grid{display:flex;flex-direction:column;gap:8px}.mode-card{border:1px solid #273a52;border-radius:11px;padding:10px;background:#0d1827;position:relative}.mode-card.recommended{border-color:#35e6b1;box-shadow:0 0 0 1px #35e6b133}.recommend{position:absolute;right:8px;top:8px;background:#123d31;color:#48e8b6;border-radius:99px;padding:3px 6px;font-size:8px;font-weight:800}.mode-title{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800}.mode-title i{font-style:normal;font-size:17px}.mode-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px}.mode-metrics span{display:block;color:#6f829b;font-size:8px}.mode-metrics strong{font-size:10px}.route-error{display:none;color:#ff7c91;font-size:10px;margin-top:8px}.route-planner.collapsed{width:auto}.route-planner.collapsed .planner-body,.route-planner.collapsed .route-results,.route-planner.collapsed .planner-kicker{display:none}.route-planner.collapsed .planner-head{border:0;gap:15px}.route-line-label{background:#091522;color:#fff;border:1px solid #35e6b1;border-radius:7px;padding:3px 6px;font-size:10px;box-shadow:0 3px 10px #0008}
+    #mapShell:fullscreen{background:#070b12;padding:12px}#mapShell:fullscreen #map{height:calc(100vh - 24px)!important}
+    @media(max-width:768px){.map-legend{display:none}.route-planner{width:calc(100% - 24px);left:12px;top:12px;max-height:62%}}
 </style>
-
-<div class="peta-flex-container">
-    <!-- PANEL SISI KIRI -->
-    <div class="peta-sidebar-kiri">
-        <div class="card custom-card p-4 mb-3">
-            <h5 class="mb-3 text-white fw-bold"><i class="fas fa-map-signs me-2" style="color: #6366f1;"></i> Route Planner</h5>
-            
-            <div class="mb-3">
-                <label class="custom-label">Origin Port</label>
-                <select id="origin-port" class="custom-select">
-                    <option value="">Select origin...</option>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label class="custom-label">Destination Port</label>
-                <select id="destination-port" class="custom-select">
-                    <option value="">Select destination...</option>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label class="custom-label">Transport Mode</label>
-                <div class="transport-group">
-                    <div class="btn-transport" data-mode="Ship">
-                        <i class="fas fa-ship"></i><br><span>Ship</span>
-                    </div>
-                    <div class="btn-transport active" data-mode="Air">
-                        <i class="fas fa-plane"></i><br><span>Air</span>
-                    </div>
-                    <div class="btn-transport" data-mode="Truck">
-                        <i class="fas fa-truck"></i><br><span>Truck</span>
-                    </div>
-                </div>
-            </div>
-
-            <button id="btn-calculate" class="btn-calc mt-2">Calculate Route</button>
-        </div>
-
-        <div class="card custom-card p-4">
-            <h6 class="text-warning mb-2 fw-bold"><i class="fas fa-lightbulb me-2"></i> Routing Notes</h6>
-            <p class="text-muted small mb-3">Transit estimations are calculated instantly using geographic coordinates.</p>
-            
-            <div class="d-flex justify-content-between border-bottom border-dark pb-2 mb-2 small text-muted">
-                <span><i class="fas fa-ship me-1"></i> Sea Speed</span> <span>30 km/h</span>
-            </div>
-            <div class="d-flex justify-content-between border-bottom border-dark pb-2 mb-2 small text-muted">
-                <span><i class="fas fa-plane me-1"></i> Air Speed</span> <span>800 km/h</span>
-            </div>
-            <div class="d-flex justify-content-between border-bottom border-dark pb-3 mb-3 small text-muted">
-                <span><i class="fas fa-truck me-1"></i> Road Speed</span> <span>70 km/h</span>
-            </div>
-
-            <div class="result-box text-center mt-2">
-                <div class="small text-muted fw-bold mb-1 text-uppercase">Result Estimation</div>
-                <h3 id="route-distance" class="text-info my-1 fw-bold">0 KM</h3>
-                <span id="route-duration" class="badge p-2 mt-1" style="background-color: #4f46e5; font-size: 0.8rem;">0 Jam 0 Menit</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- BOX PETA DAN SEARCH BAR -->
-    <div class="peta-box-kanan" id="map-wrapper">
-        <div class="map-search-container">
-            <input type="text" id="map-search" class="map-search-input" placeholder="🔍 Cari nama pelabuhan di sini lek...">
-        </div>
-        <div id="map"></div>
-    </div>
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-4">
+    <div><span class="text-xs uppercase tracking-[.25em] text-emerald-400 font-bold">Geospatial intelligence</span><h2 class="text-3xl font-bold text-white mt-1">Global Port & Country Map</h2><p class="text-sm text-slate-400 mt-1">World Port Index — marker pelabuhan dikelompokkan dan negara ditandai terpisah.</p></div>
+    <div class="flex gap-3 text-xs"><div class="px-3 py-2 rounded-lg border border-slate-700 bg-slate-900"><b class="text-white" id="portCount">0</b> Pelabuhan</div><div class="px-3 py-2 rounded-lg border border-slate-700 bg-slate-900"><b class="text-white" id="countryCount">0</b> Negara</div><button onclick="toggleFullscreen()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold">⛶ Fullscreen</button></div>
 </div>
-
+<div id="mapShell" class="relative rounded-2xl">
+    <div id="map" class="h-[calc(100vh-175px)] min-h-[720px] w-full rounded-2xl border border-slate-700 shadow-2xl overflow-hidden"></div>
+    <aside class="route-planner" id="routePlanner">
+        <div class="planner-head"><div><div class="planner-kicker">Multimodal Logistics</div><h3>Port-to-Port Route Planner</h3></div><button class="planner-toggle" type="button" onclick="togglePlanner()">−</button></div>
+        <div class="planner-body">
+            <div class="route-field"><label>Pelabuhan asal</label><input id="originPort" list="portOptions" placeholder="Ketik nama pelabuhan asal..."></div>
+            <div class="route-field"><label>Pelabuhan tujuan</label><input id="destinationPort" list="portOptions" placeholder="Ketik nama pelabuhan tujuan..."></div>
+            <datalist id="portOptions"></datalist>
+            <div class="cargo-row"><div class="route-field"><label>Berat kargo (ton)</label><input id="cargoWeight" type="number" min="0.1" value="10" step="0.1"></div><div class="route-field"><label>Prioritas</label><input id="routePriority" list="priorityOptions" value="Balanced"><datalist id="priorityOptions"><option value="Balanced"><option value="Fastest"><option value="Lowest cost"><option value="Lowest emission"></datalist></div></div>
+            <button class="calculate-route" type="button" onclick="calculateRoute()">HITUNG 3 ALTERNATIF RUTE</button><div class="route-error" id="routeError"></div><p class="planner-note">Estimasi berbasis jarak geodesik, kecepatan rata-rata, handling, biaya, dan faktor emisi. Bukan jadwal atau quotation carrier.</p>
+        </div>
+        <div class="route-results" id="routeResults"><div class="route-summary"><strong id="routeDistance">—</strong><span id="routePair">—</span></div><div class="mode-grid" id="modeGrid"></div></div>
+    </aside>
+    <aside class="map-legend absolute z-[1000] left-4 bottom-4 w-56 bg-slate-950/95 backdrop-blur border border-slate-700 rounded-xl p-4 shadow-2xl">
+        <h3 class="text-sm font-bold text-white mb-4">Legenda Peta</h3>
+        <div class="space-y-3 text-xs text-slate-400"><div class="flex items-center gap-3"><i class="port-dot large block"></i> Pelabuhan besar</div><div class="flex items-center gap-3"><i class="port-dot medium block"></i> Pelabuhan medium</div><div class="flex items-center gap-3"><i class="port-dot block"></i> Pelabuhan lainnya</div><div class="flex items-center gap-3"><span class="px-2 py-1 border border-emerald-500 rounded text-white">🇮🇩 ID</span> Pusat negara</div></div>
+        <div class="border-t border-slate-800 mt-4 pt-3 text-[11px] text-slate-500">Klik cluster untuk memperbesar dan marker untuk melihat detail.</div>
+    </aside>
+</div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
-
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        let selectedMode = 'Air'; // Default aktif pesawat sesuai screenshot abang
-        let currentRouteLine = null;
-        let allMarkersMap = {}; 
-
-        const defaultLat = -2.5489;
-        const defaultLon = 118.0149;
-        const defaultZoom = 4;
-
-        const map = L.map('map', {
-            zoomControl: true
-        }).setView([defaultLat, defaultLon], defaultZoom);
-
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap &copy; CARTO',
-            maxZoom: 20
-        }).addTo(map);
-
-        const markerClusterGroup = L.markerClusterGroup();
-        map.addLayer(markerClusterGroup);
-
-        // ENGINE SYNC DATA DATABASE SECARA REALTIME (TIAP 5 DETIK)
-        function loadPortsRealtime() {
-            fetch('/api/ports')
-                .then(response => response.json())
-                .then(res => {
-                    const originSelect = document.getElementById('origin-port');
-                    const destSelect = document.getElementById('destination-port');
-                    const ports = res.data || [];
-                    
-                    const currentOrigin = originSelect.value;
-                    const currentDest = destSelect.value;
-
-                    originSelect.innerHTML = '<option value="">Select origin...</option>';
-                    destSelect.innerHTML = '<option value="">Select destination...</option>';
-                    markerClusterGroup.clearLayers();
-
-                    ports.forEach(port => {
-                        let optionText = `${port.port_name} (${port.country_code || '??'})`;
-                        let optionValue = JSON.stringify({ lat: parseFloat(port.latitude), lon: parseFloat(port.longitude) });
-                        
-                        originSelect.options[originSelect.options.length] = new Option(optionText, optionValue);
-                        destSelect.options[destSelect.options.length] = new Option(optionText, optionValue);
-
-                        let markerColor = '#10b981';
-                        if (port.risk_score >= 70) markerColor = '#ef4444';
-                        else if (port.risk_score >= 40) markerColor = '#f59e0b';
-
-                        let marker = L.circleMarker([parseFloat(port.latitude), parseFloat(port.longitude)], {
-                            radius: 8,
-                            fillColor: markerColor,
-                            color: '#ffffff',
-                            weight: 1.5,
-                            opacity: 1,
-                            fillOpacity: 0.8
-                        }).bindPopup(`<b>${port.port_name}</b><br>Country: ${port.country_name || '-'}<br>Risk Score: ${port.risk_score}`);
-
-                        markerClusterGroup.addLayer(marker);
-                        
-                        allMarkersMap[port.port_name.toLowerCase()] = {
-                            marker: marker,
-                            lat: parseFloat(port.latitude),
-                            lon: parseFloat(port.longitude)
-                        };
-                    });
-
-                    if(currentOrigin) originSelect.value = currentOrigin;
-                    if(currentDest) destSelect.value = currentDest;
-                })
-                .catch(err => console.error('Gagal sinkronisasi data:', err));
-        }
-
-        loadPortsRealtime();
-        setInterval(loadPortsRealtime, 5000); // Polling background running
-
-        // BUTTON NAVIGASI: RESET VIEW (HOME)
-        const HomeControl = L.Control.extend({
-            options: { position: 'topleft' },
-            onAdd: function () {
-                const container = L.DomUtil.create('div', 'leaflet-bar');
-                const button = L.DomUtil.create('a', 'custom-map-btn', container);
-                button.innerHTML = '<i class="fa-solid fa-house"></i>';
-                L.DomEvent.on(button, 'click', function (e) {
-                    L.DomEvent.stopPropagation(e);
-                    map.setView([defaultLat, defaultLon], defaultZoom);
-                });
-                return container;
-            }
-        });
-        map.addControl(new HomeControl());
-
-        // BUTTON NAVIGASI: FULLSCREEN LAYAR
-        const FullscreenControl = L.Control.extend({
-            options: { position: 'topleft' },
-            onAdd: function () {
-                const container = L.DomUtil.create('div', 'leaflet-bar');
-                const button = L.DomUtil.create('a', 'custom-map-btn', container);
-                button.innerHTML = '<i class="fa-solid fa-expand"></i>';
-                L.DomEvent.on(button, 'click', function (e) {
-                    L.DomEvent.stopPropagation(e);
-                    const wrapper = document.getElementById('map-wrapper');
-                    if (!document.fullscreenElement) {
-                        wrapper.requestFullscreen();
-                        button.innerHTML = '<i class="fa-solid fa-compress"></i>';
-                    } else {
-                        document.exitFullscreen();
-                        button.innerHTML = '<i class="fa-solid fa-expand"></i>';
-                    }
-                });
-                return container;
-            }
-        });
-        map.addControl(new FullscreenControl());
-
-        // LOGIKA PENYARINGAN LIVE SEARCH BAR
-        document.getElementById('map-search').addEventListener('input', function(e) {
-            const query = e.target.value.toLowerCase().trim();
-            if(!query) return;
-            for (let name in allMarkersMap) {
-                if (name.includes(query)) {
-                    const target = allMarkersMap[name];
-                    map.setView([target.lat, target.lon], 9, { animate: true, duration: 1 });
-                    target.marker.openPopup();
-                    break;
-                }
-            }
-        });
-
-        // HANDLE TOMBOL TRANSPORT MODE
-        document.querySelectorAll('.btn-transport').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.btn-transport').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                selectedMode = this.getAttribute('data-mode');
-            });
-        });
-
-        // HITUNG RUMUS HAVERSINE DISTANCE
-        function calculateHaversine(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        }
-
-        // AKSI TOMBOL CALCULATE ROUTE (WAKTU LEBIH DINAMIS & JALAN TERUS)
-        document.getElementById('btn-calculate').addEventListener('click', function() {
-            const originVal = document.getElementById('origin-port').value;
-            const destVal = document.getElementById('destination-port').value;
-
-            if (!originVal || !destVal) {
-                alert('Pilih pelabuhan asal dan tujuan terlebih dahulu lek!');
-                return;
-            }
-
-            const origin = JSON.parse(originVal);
-            const dest = JSON.parse(destVal);
-            const distance = calculateHaversine(origin.lat, origin.lon, dest.lat, dest.lon);
-
-            let speed = 30; 
-            if (selectedMode === 'Air') speed = 800;
-            if (selectedMode === 'Truck') speed = 70;
-
-            const totalHours = distance / speed;
-            let displayDuration = "";
-            
-            // Logika pemisah: jika waktu perjalanan di bawah 24 jam lek
-            if (totalHours < 24) {
-                const hours = Math.floor(totalHours);
-                const minutes = Math.round((totalHours - hours) * 60);
-                displayDuration = `${hours} Jam ${minutes} Menit`;
-            } else {
-                // Jika perjalanan berhari-hari
-                const days = Math.floor(totalHours / 24);
-                const remainingHours = Math.round(totalHours % 24);
-                displayDuration = `${days} Hari ${remainingHours} Jam`;
-            }
-
-            document.getElementById('route-distance').innerText = Math.round(distance).toLocaleString('id-ID') + " KM";
-            document.getElementById('route-duration').innerText = displayDuration;
-
-            if (currentRouteLine) map.removeLayer(currentRouteLine);
-
-            currentRouteLine = L.polyline([[origin.lat, origin.lon], [dest.lat, dest.lon]], {
-                color: '#6366f1',
-                weight: 4,
-                dashArray: '6, 10',
-                opacity: 0.9
-            }).addTo(map);
-
-            map.fitBounds(currentRouteLine.getBounds(), { padding: [50, 50] });
-        });
-    });
+const ports=@json($mapPorts);
+const map=L.map('map',{zoomControl:false,minZoom:2,worldCopyJump:true}).setView([12,20],2);
+L.control.zoom({position:'bottomright'}).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'OpenStreetMap · CARTO'}).addTo(map);
+const clusters=L.markerClusterGroup({chunkedLoading:true,maxClusterRadius:48,showCoverageOnHover:false});
+const countries=L.layerGroup();
+const countryData={};
+const flag=code=>code&&code.length===2?[...code.toUpperCase()].map(c=>String.fromCodePoint(127397+c.charCodeAt())).join(''):'🌐';
+ports.forEach(p=>{
+    if(!Number.isFinite(p.lat)||!Number.isFinite(p.lng))return;
+    const size=(p.size||'').toLowerCase(), cls=size.includes('large')?'large':(size.includes('medium')?'medium':'');
+    const icon=L.divIcon({className:'',html:`<div class="port-dot ${cls}"></div>`,iconSize:[14,14],iconAnchor:[7,7]});
+    L.marker([p.lat,p.lng],{icon}).bindPopup(`<div style="min-width:210px"><b style="color:#fff;font-size:14px">⚓ ${p.name}</b><div style="color:#34d399;margin:5px 0">${flag(p.code)} ${p.country||'Unknown country'}</div><div>Harbor: ${p.size||'-'} · ${p.type||'-'}</div><small style="color:#94a3b8">ID: ${p.wpi||'-'}<br>Source: ${p.source||'-'}</small></div>`).addTo(clusters);
+    const key=p.code||p.country;if(key){countryData[key]??={name:p.country,code:p.code,lat:0,lng:0,n:0};countryData[key].lat+=p.lat;countryData[key].lng+=p.lng;countryData[key].n++;}
+});
+Object.values(countryData).forEach(c=>{const icon=L.divIcon({className:'country-badge',html:`${flag(c.code)} ${c.code||c.name}`});L.marker([c.lat/c.n,c.lng/c.n],{icon,zIndexOffset:1000}).bindTooltip(`${c.name} · ${c.n} ports`,{direction:'top'}).addTo(countries)});
+clusters.addTo(map);countries.addTo(map);L.control.layers(null,{'⚓ Pelabuhan':clusters,'🌍 Negara':countries},{collapsed:false,position:'topright'}).addTo(map);
+portCount.textContent=ports.length.toLocaleString();countryCount.textContent=Object.keys(countryData).length.toLocaleString();
+const portOptions=document.getElementById('portOptions');
+const portLookup=new Map();
+ports.forEach((p,index)=>{if(!Number.isFinite(p.lat)||!Number.isFinite(p.lng))return;const label=`${p.name} — ${p.country||p.code||'Unknown'} [${index}]`;portLookup.set(label,p);const option=document.createElement('option');option.value=label;portOptions.appendChild(option)});
+let plannedRoute=L.layerGroup().addTo(map);
+const money=value=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(value);
+const distance=value=>new Intl.NumberFormat('id-ID',{maximumFractionDigits:0}).format(value)+' km';
+function duration(hours){const days=Math.floor(hours/24),remaining=Math.round(hours%24);return days?`${days} hari ${remaining} jam`:`${remaining} jam`}
+function haversine(a,b){const rad=n=>n*Math.PI/180,R=6371,dLat=rad(b.lat-a.lat),dLon=rad(b.lng-a.lng),x=Math.sin(dLat/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
+function togglePlanner(){const planner=document.getElementById('routePlanner');planner.classList.toggle('collapsed');planner.querySelector('.planner-toggle').textContent=planner.classList.contains('collapsed')?'+':'−';setTimeout(()=>map.invalidateSize(),200)}
+function calculateRoute(){
+ const origin=portLookup.get(document.getElementById('originPort').value),destination=portLookup.get(document.getElementById('destinationPort').value),error=document.getElementById('routeError');error.style.display='none';
+ if(!origin||!destination){error.textContent='Pilih pelabuhan dari daftar yang tersedia.';error.style.display='block';return}if(origin===destination){error.textContent='Pelabuhan asal dan tujuan harus berbeda.';error.style.display='block';return}
+ const direct=haversine(origin,destination),tons=Math.max(.1,Number(document.getElementById('cargoWeight').value)||10),priority=document.getElementById('routePriority').value;
+ const modes=[
+  {key:'truck',icon:'🚚',name:'Truck / Road Freight',color:'#35e6b1',km:direct*1.25,hours:direct*1.25/62+6,cost:direct*1.25*tons*.11+180,co2:direct*1.25*tons*.062,capacity:'24 ton',note:'Termasuk buffer jalan & 6 jam handling'},
+  {key:'air',icon:'✈️',name:'Air Cargo',color:'#9878ff',km:direct*1.05,hours:direct*1.05/750+10,cost:tons*1000*4.2+800,co2:direct*1.05*tons*.602,capacity:'120 ton',note:'Termasuk transfer bandara & 10 jam handling'},
+  {key:'ship',icon:'🚢',name:'Ocean Freight',color:'#37c8ff',km:direct*1.08,hours:direct*1.08/30+30,cost:direct*1.08*tons*.035+350,co2:direct*1.08*tons*.011,capacity:'20K+ TEU',note:'Termasuk deviasi laut & 30 jam port handling'}
+ ];
+ const max=(field)=>Math.max(...modes.map(m=>m[field]));modes.forEach(m=>{m.score=priority==='Fastest'?m.hours:(priority==='Lowest cost'?m.cost:(priority==='Lowest emission'?m.co2:(m.hours/max('hours')*.4+m.cost/max('cost')*.35+m.co2/max('co2')*.25)))});const recommended=[...modes].sort((a,b)=>a.score-b.score)[0];
+ document.getElementById('routeDistance').textContent=distance(direct)+' jarak langsung';document.getElementById('routePair').textContent=`${origin.name} → ${destination.name} · ${tons.toLocaleString('id-ID')} ton kargo`;
+ document.getElementById('modeGrid').innerHTML=modes.map(m=>`<article class="mode-card ${m===recommended?'recommended':''}">${m===recommended?'<span class="recommend">REKOMENDASI</span>':''}<div class="mode-title"><i>${m.icon}</i><div>${m.name}<div style="color:#657991;font-size:8px;font-weight:400">${m.note}</div></div></div><div class="mode-metrics"><div><span>Waktu tempuh</span><strong>${duration(m.hours)}</strong></div><div><span>Estimasi biaya</span><strong>${money(m.cost)}</strong></div><div><span>Emisi CO₂</span><strong>${Math.round(m.co2).toLocaleString('id-ID')} kg</strong></div><div><span>Jarak efektif</span><strong>${distance(m.km)}</strong></div><div><span>Kapasitas tipikal</span><strong>${m.capacity}</strong></div><div><span>Kecepatan asumsi</span><strong>${m.key==='truck'?'62 km/j':m.key==='air'?'750 km/j':'30 km/j'}</strong></div></div></article>`).join('');document.getElementById('routeResults').style.display='block';
+ plannedRoute.clearLayers();const points=[[origin.lat,origin.lng],[destination.lat,destination.lng]];L.polyline(points,{color:'#071018',weight:8,opacity:.8}).addTo(plannedRoute);L.polyline(points,{color:recommended.color,weight:4,dashArray:'10 8',opacity:.95}).bindTooltip(`${recommended.icon} ${recommended.name} · ${duration(recommended.hours)}`,{permanent:false,className:'route-line-label'}).addTo(plannedRoute);L.circleMarker(points[0],{radius:8,color:'#fff',weight:2,fillColor:'#35e6b1',fillOpacity:1}).bindPopup(`<b>Asal</b><br>${origin.name}`).addTo(plannedRoute);L.circleMarker(points[1],{radius:8,color:'#fff',weight:2,fillColor:'#ff6079',fillOpacity:1}).bindPopup(`<b>Tujuan</b><br>${destination.name}`).addTo(plannedRoute);map.fitBounds(points,{padding:[80,80],maxZoom:7});
+}
+function toggleFullscreen(){const shell=document.getElementById('mapShell');if(!document.fullscreenElement)shell.requestFullscreen();else document.exitFullscreen()}
+document.addEventListener('fullscreenchange',()=>setTimeout(()=>map.invalidateSize(),150));
 </script>
 @endsection

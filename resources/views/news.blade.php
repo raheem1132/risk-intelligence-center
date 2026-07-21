@@ -1,78 +1,32 @@
-@extends(view()->exists('layouts.app') ? 'layouts.app' : (view()->exists('dashboard') ? 'dashboard' : 'welcome'))
-
+@extends('layouts.app')
 @section('content')
-<div class="container mx-auto px-4 py-6">
-    <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
-        <span class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg">📰</span> News & Global Events Intelligence
-    </h2>
+@php
+    $feed = collect($articles);
+    $lead = $feed->first();
+    $positive = $feed->filter(fn ($a) => ($a['sentiment']['label'] ?? 'Neutral') === 'Positive')->count();
+    $negative = $feed->filter(fn ($a) => ($a['sentiment']['label'] ?? 'Neutral') === 'Negative')->count();
+    $neutral = $feed->count() - $positive - $negative;
+    $fallback = 'https://images.unsplash.com/photo-1494412519320-aa613dfb7738?auto=format&fit=crop&w=1200&q=80';
+@endphp
+<style>
+    .newsroom{max-width:1540px;margin:auto;color:#eef6ff}.news-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:20px}.news-kicker{color:#35e6b1;font-size:.7rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase}.news-head h1{font-size:2.25rem;font-weight:850;letter-spacing:-.04em;margin:6px 0}.news-head p{margin:0;color:#8fa0b8}.live-state{display:flex;align-items:center;gap:8px;padding:9px 13px;border:1px solid #2a4158;border-radius:99px;font-size:.7rem;color:#b8c7da}.live-state i{width:8px;height:8px;border-radius:50%;background:#35e6b1;box-shadow:0 0 13px #35e6b1}
+    .news-filter{display:grid;grid-template-columns:130px 1fr auto;gap:10px;padding:13px;background:#0d1725;border:1px solid #25364d;border-radius:16px;margin-bottom:17px}.news-filter input{background:#09121f;border:1px solid #293b53;border-radius:11px;color:#fff;padding:12px 13px;outline:none}.news-filter input:focus{border-color:#35e6b1}.news-filter button,.refresh-link{border:0;border-radius:11px;background:#35e6b1;color:#04130f;padding:0 19px;font-weight:800;font-size:.74rem;text-decoration:none;display:grid;place-items:center}.refresh-link{background:#17243a;color:#49e5b5;border:1px solid #2a4258;min-height:42px}.filter-actions{display:flex;gap:9px}
+    .news-overview{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:17px}.lead-story{position:relative;height:385px;border:1px solid #293b52;border-radius:20px;overflow:hidden;background:#101b2b;color:#fff;text-decoration:none}.lead-story>img{width:100%;height:100%;object-fit:cover}.lead-story:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,8,15,.05),rgba(3,8,15,.95))}.lead-copy{position:absolute;z-index:2;left:25px;right:25px;bottom:24px}.lead-copy h2{font-size:1.65rem;line-height:1.17;font-weight:850;max-width:800px;margin:10px 0}.story-meta{display:flex;gap:13px;align-items:center;color:#b4c2d4;font-size:.68rem}.sentiment{padding:5px 9px;border-radius:99px;font-size:.62rem;font-weight:800}.positive{background:#123b30;color:#42ebb4}.negative{background:#421c29;color:#ff7089}.neutral{background:#443719;color:#ffd15b}
+    .pulse-panel{padding:22px;background:linear-gradient(145deg,#111c2d,#0a1320);border:1px solid #26384e;border-radius:20px}.pulse-panel h2{font-size:1rem;font-weight:800}.pulse-score{text-align:center;padding:23px 0}.pulse-score strong{font-size:3rem;display:block}.pulse-score span{color:#8192aa;font-size:.7rem}.pulse-meter{height:10px;display:flex;border-radius:99px;overflow:hidden;background:#18263a;margin-bottom:17px}.pulse-row{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid #203047;font-size:.76rem}.pulse-row span{display:flex;align-items:center;gap:8px}.pulse-row i{width:8px;height:8px;border-radius:50%}.updated{margin-top:18px;color:#71839d;font-size:.68rem;line-height:1.5}
+    .section-title{display:flex;justify-content:space-between;align-items:center;margin:23px 0 13px}.section-title h2{font-size:1.05rem;font-weight:800}.section-title span{color:#7789a2;font-size:.68rem}.news-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.news-card{background:#0e1827;border:1px solid #24364c;border-radius:17px;overflow:hidden;display:flex;flex-direction:column;min-height:355px;transition:.22s}.news-card:hover{transform:translateY(-3px);border-color:#3a526e;box-shadow:0 18px 40px rgba(0,0,0,.2)}.card-image{height:160px;position:relative;background:#162339;overflow:hidden}.card-image img{width:100%;height:100%;object-fit:cover;transition:.3s}.news-card:hover .card-image img{transform:scale(1.035)}.card-image .sentiment{position:absolute;top:12px;right:12px}.card-body{padding:16px;display:flex;flex-direction:column;flex:1}.card-body h3{font-size:.86rem;line-height:1.38;font-weight:800;margin:0 0 9px}.card-body p{font-size:.71rem;line-height:1.5;color:#8c9db4;margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.card-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:14px}.card-bottom span{font-size:.64rem;color:#71849e}.card-bottom a{color:#42e4b3;text-decoration:none;font-size:.68rem;font-weight:750}.empty-news{padding:80px;text-align:center;border:1px solid #25364c;border-radius:18px;color:#8192a9}
+    @media(max-width:1050px){.news-grid{grid-template-columns:1fr 1fr}.news-overview{grid-template-columns:1fr}.pulse-panel{display:none}}@media(max-width:700px){.news-head{align-items:flex-start;flex-direction:column}.news-filter{grid-template-columns:1fr}.filter-actions{flex-direction:column}.news-filter button{min-height:42px}.news-grid{grid-template-columns:1fr}.lead-story{height:340px}.lead-copy h2{font-size:1.25rem}}
+</style>
+<div class="newsroom">
+    <header class="news-head"><div><div class="news-kicker">Realtime Media Intelligence</div><h1>Global Supply Chain Newsroom</h1><p>Berita terbaru GNews dengan analisis sentimen otomatis.</p></div><div class="live-state"><i></i>Feed diperbarui setiap 10 menit</div></header>
+    <form class="news-filter"><input name="country" value="{{ request('country','ID') }}" maxlength="2" placeholder="Kode negara"><input name="keyword" value="{{ request('keyword','logistics trade shipping economy') }}" placeholder="Topik: logistics, shipping, economy..."><div class="filter-actions"><button>Cari berita</button><a class="refresh-link" href="{{ request()->fullUrlWithQuery(['refresh'=>1]) }}">↻ Refresh realtime</a></div></form>
 
-    <!-- Grid Berita Utama -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Kolom Kiri & Tengah: Feed Berita Berjalan -->
-        <div class="lg:col-span-2 space-y-4 h-[650px] overflow-y-auto pr-2">
-            
-            @if(isset($realtimeNews) && count($realtimeNews) > 0)
-                @foreach($realtimeNews as $news)
-                    <div class="p-4 bg-[#111827] border border-gray-800/80 rounded-xl hover:border-gray-700 transition flex flex-col justify-between gap-3 shadow-sm">
-                        <div class="flex justify-between items-start gap-4">
-                            <h4 class="text-sm font-bold text-gray-200 hover:text-emerald-400 cursor-pointer transition">
-                                {{ $news['title'] ?? 'No Title Available' }}
-                            </h4>
-                            <span class="text-[10px] uppercase font-bold px-2.5 py-0.5 rounded border whitespace-nowrap {{ $news['badge'] ?? 'bg-gray-500/10 text-gray-400 border-gray-500/20' }}">
-                                {{ $news['sentiment'] ?? 'Neutral' }}
-                            </span>
-                        </div>
-                        <div class="flex justify-between items-center text-xs text-gray-500 border-t border-gray-800/40 pt-2">
-                            <span class="flex items-center gap-1">🌐 Source: {{ $news['source'] ?? 'Unknown Source' }}</span>
-                            <span>🕒 {{ $news['time'] ?? 'Just now' }}</span>
-                        </div>
-                    </div>
-                @endforeach
-            @else
-                <div class="p-8 text-center bg-[#111827] border border-gray-800 rounded-xl text-gray-400">
-                    ⚠️ Belum ada data berita yang dikirim dari controller/route lek.
-                </div>
-            @endif
-
-        </div>
-
-        <!-- Kolom Kanan: Widget Statistik Sentimen -->
-        <div class="space-y-6">
-            <div class="bg-[#111827] border border-gray-800/80 rounded-xl p-6 shadow-sm">
-                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-3 mb-4">
-                    Global Node Sentiment (24h)
-                </h3>
-                <div class="space-y-3">
-                    <div>
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="text-emerald-400 font-semibold">Positive Sentiment</span>
-                            <span class="text-gray-400">58%</span>
-                        </div>
-                        <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                            <div class="bg-emerald-500 h-full rounded-full" style="width: 58%"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="text-amber-400 font-semibold">Neutral Sentiment</span>
-                            <span class="text-gray-400">22%</span>
-                        </div>
-                        <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                            <div class="bg-amber-500 h-full rounded-full" style="width: 22%"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="text-red-400 font-semibold">Negative Risk Sentiment</span>
-                            <span class="text-gray-400">20%</span>
-                        </div>
-                        <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                            <div class="bg-red-500 h-full rounded-full" style="width: 20%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    @if($lead)
+    @php $leadLabel = strtolower($lead['sentiment']['label'] ?? 'neutral'); @endphp
+    <section class="news-overview"><a class="lead-story" href="{{ $lead['url'] ?? '#' }}" target="_blank" rel="noopener"><img src="{{ $lead['image'] ?? $fallback }}" alt="{{ $lead['title'] }}" onerror="this.src='{{ $fallback }}'"><div class="lead-copy"><div class="story-meta"><span class="sentiment {{ $leadLabel }}">{{ ucfirst($leadLabel) }}</span><span>{{ data_get($lead,'source.name',is_string($lead['source'] ?? null) ? $lead['source'] : 'GNews') }}</span><span>{{ filled($lead['published_at'] ?? null) ? \Carbon\Carbon::parse($lead['published_at'])->diffForHumans() : 'Baru saja' }}</span></div><h2>{{ $lead['title'] }}</h2></div></a>
+        <aside class="pulse-panel"><h2>Sentiment Pulse</h2><div class="pulse-score"><strong>{{ $feed->count() }}</strong><span>berita dianalisis</span></div>@php $total=max($feed->count(),1); @endphp<div class="pulse-meter"><i style="width:{{ $positive/$total*100 }}%;background:#35e6b1"></i><i style="width:{{ $neutral/$total*100 }}%;background:#fbbf24"></i><i style="width:{{ $negative/$total*100 }}%;background:#ff6079"></i></div><div class="pulse-row"><span><i style="background:#35e6b1"></i>Positif</span><strong>{{ $positive }}</strong></div><div class="pulse-row"><span><i style="background:#fbbf24"></i>Netral</span><strong>{{ $neutral }}</strong></div><div class="pulse-row"><span><i style="background:#ff6079"></i>Negatif</span><strong>{{ $negative }}</strong></div><p class="updated">Tekan Refresh realtime untuk melewati cache dan mengambil berita terbaru langsung dari GNews.</p></aside>
+    </section>
+    <div class="section-title"><h2>Latest Intelligence</h2><span>{{ $feed->count() }} artikel terbaru</span></div>
+    <section class="news-grid">@foreach($feed->skip(1) as $a)@php $label=strtolower($a['sentiment']['label'] ?? 'neutral'); @endphp<article class="news-card"><div class="card-image"><img src="{{ $a['image'] ?? $fallback }}" alt="{{ $a['title'] }}" loading="lazy" onerror="this.src='{{ $fallback }}'"><span class="sentiment {{ $label }}">{{ ucfirst($label) }}</span></div><div class="card-body"><h3>{{ $a['title'] }}</h3><p>{{ $a['description'] ?? 'Tidak ada ringkasan berita.' }}</p><div class="card-bottom"><span>{{ data_get($a,'source.name',is_string($a['source'] ?? null) ? $a['source'] : 'GNews') }} · {{ filled($a['published_at'] ?? null) ? \Carbon\Carbon::parse($a['published_at'])->diffForHumans() : 'Baru' }}</span>@if($a['url'] ?? null)<a href="{{ $a['url'] }}" target="_blank" rel="noopener">Baca sumber ↗</a>@endif</div></div></article>@endforeach</section>
+    @else<div class="empty-news">Tidak ada berita yang ditemukan. Coba kata kunci lain atau periksa GNEWS_API_KEY.</div>@endif
 </div>
 @endsection

@@ -33,4 +33,8 @@ class Country extends Model
     {
         return $this->hasMany(RiskScore::class);
     }
+
+    public function economicIndicators(): HasMany { return $this->hasMany(EconomicIndicator::class); }
+    public function weatherSnapshots(): HasMany { return $this->hasMany(WeatherSnapshot::class); }
+    public function currencySnapshots(): HasMany { return $this->hasMany(CurrencySnapshot::class); }
 }

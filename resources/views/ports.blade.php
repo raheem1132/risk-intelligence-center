@@ -1,94 +1,34 @@
 @extends('layouts.app')
-
 @section('content')
-<!-- Header Konten -->
-<div class="flex justify-between items-center mb-8">
-    <div>
-        <h2 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-            ⚓ Global Ports & Maritime Hubs
-        </h2>
-        <p class="text-sm text-gray-400 mt-1">Monitoring container congestion, anchorage waiting times, and operational status</p>
-    </div>
-    <div class="relative">
-        <input type="text" placeholder="Search port or code..." class="bg-[#111827] border border-gray-800 rounded-lg px-4 py-2 text-xs text-white w-64 focus:outline-none focus:border-emerald-500 transition">
-    </div>
-</div>
+<style>
+    .ports-page{color:#eef6ff;max-width:1540px;margin:auto}.port-hero{position:relative;min-height:230px;padding:32px;border:1px solid #26374e;border-radius:22px;overflow:hidden;background:#0d1725;margin-bottom:18px;display:flex;align-items:flex-end}.port-hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.48}.port-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,11,20,.98) 0%,rgba(5,11,20,.78) 45%,rgba(5,11,20,.18) 100%)}.hero-content{position:relative;z-index:1;max-width:680px}.hero-kicker{color:#35e6b1;font-size:.7rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase}.hero-content h1{font-size:2.25rem;font-weight:850;letter-spacing:-.04em;margin:8px 0}.hero-content p{color:#a3b2c7;font-size:.88rem;margin:0}.hero-badge{display:inline-flex;margin-top:18px;padding:8px 13px;border-radius:999px;background:rgba(53,230,177,.12);border:1px solid rgba(53,230,177,.3);color:#52ebba;font-size:.72rem}
+    .port-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:18px}.port-stat{background:linear-gradient(145deg,#111c2d,#0b1320);border:1px solid #24344a;border-radius:16px;padding:17px}.port-stat span{display:block;color:#8090a8;font-size:.69rem;margin-bottom:5px}.port-stat strong{font-size:1.35rem}.port-stat em{font-style:normal;color:#35e6b1;font-size:.65rem;display:block;margin-top:3px}
+    .port-tools{display:flex;gap:12px;margin-bottom:18px}.search-shell{position:relative;flex:1}.search-shell input{width:100%;padding:14px 48px 14px 17px;background:#0d1725;border:1px solid #293a52;border-radius:14px;color:#fff;outline:none}.search-shell input:focus{border-color:#35e6b1;box-shadow:0 0 0 3px rgba(53,230,177,.08)}.search-shell button{position:absolute;right:8px;top:7px;width:38px;height:38px;border:0;border-radius:10px;background:#35e6b1;color:#06120f;font-weight:900}.source-pill{display:grid;place-items:center;padding:0 17px;border:1px solid #293a52;border-radius:14px;background:#0d1725;color:#91a3bb;font-size:.72rem}
+    .port-table-card{border:1px solid #25364d;background:#0d1625;border-radius:19px;overflow:hidden}.port-table{width:100%;border-collapse:collapse}.port-table th{padding:15px 16px;text-align:left;color:#71829c;font-size:.66rem;text-transform:uppercase;letter-spacing:.11em;background:#101b2c}.port-table td{padding:14px 16px;border-top:1px solid #1e2c40;font-size:.78rem;vertical-align:middle}.port-table tr{transition:.2s}.port-table tbody tr:hover{background:#122035}.port-identity{display:flex;align-items:center;gap:12px}.port-thumb{width:48px;height:48px;border-radius:12px;overflow:hidden;position:relative;background:linear-gradient(145deg,#18314b,#0b1523);display:grid;place-items:center;color:#38c9ff;font-size:1.15rem;border:1px solid #29415d}.port-name strong{display:block;color:#f3f7fd;font-size:.82rem}.port-name span{display:block;color:#73849e;font-size:.65rem;margin-top:3px}.country-cell{display:flex;align-items:center;gap:9px}.country-cell img{width:30px;height:20px;object-fit:cover;border-radius:4px;border:1px solid #34445a;background:#fff}.country-cell span{font-weight:650}.size-badge,.source-badge{display:inline-flex;padding:5px 9px;border-radius:99px;font-size:.62rem;font-weight:750}.size-L{background:#421c2a;color:#ff748d}.size-M{background:#433517;color:#ffd05a}.size-S,.size-X{background:#123a31;color:#46e7b2}.source-badge{background:#15243a;color:#8fb4df}.coordinates{font-family:ui-monospace,monospace;color:#9eb0c7;font-size:.67rem}.location-link{display:inline-flex;text-decoration:none;padding:7px 10px;border:1px solid #2d435e;border-radius:9px;color:#39dcb0;font-size:.65rem}.location-link:hover{background:#15382e;color:#5cf0c2}.pagination-wrap{margin-top:18px}.empty-port{padding:60px;text-align:center;color:#7f8fa5}.result-note{color:#7f90a8;font-size:.7rem;margin-bottom:9px}
+    @media(max-width:1000px){.port-stats{grid-template-columns:1fr 1fr}.port-table{min-width:900px}.port-table-card{overflow-x:auto}}@media(max-width:650px){.port-hero{padding:22px}.hero-content h1{font-size:1.7rem}.port-stats{grid-template-columns:1fr}.port-tools{flex-direction:column}.source-pill{padding:12px}}
+</style>
+<div class="ports-page">
+    <section class="port-hero">
+        <img src="https://images.unsplash.com/photo-1494412519320-aa613dfb7738?auto=format&fit=crop&w=1800&q=82" alt="Terminal pelabuhan dan kapal kargo">
+        <div class="hero-content"><div class="hero-kicker">Maritime Intelligence</div><h1>World Port Intelligence</h1><p>Jelajahi jaringan pelabuhan global, identitas lokasi, ukuran fasilitas, dan koordinat operasional dari dataset World Port Index serta UN/LOCODE.</p><span class="hero-badge">● {{ number_format($ports->total()) }} pelabuhan aktif dalam katalog</span></div>
+    </section>
 
-<!-- Grid Kartu Summary Pelabuhan -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <div class="bg-[#111827] border border-gray-800/80 rounded-xl p-5">
-        <span class="text-xs text-gray-500 font-medium block">Average Global Waiting Time</span>
-        <div class="flex items-baseline justify-between mt-2">
-            <span class="text-3xl font-bold text-white">24.2 <span class="text-xs text-gray-400 font-normal">Hours</span></span>
-            <span class="text-[10px] bg-amber-950/50 text-amber-400 px-1.5 py-0.5 rounded border border-amber-900/30">Moderate Delay</span>
-        </div>
-    </div>
-    <div class="bg-[#111827] border border-gray-800/80 rounded-xl p-5">
-        <span class="text-xs text-gray-400 font-medium block text-rose-400 flex items-center gap-1.5">
-            Most Congested Hub
-        </span>
-        <div class="flex items-baseline justify-between mt-2">
-            <span class="text-xl font-bold text-white">Port of Shanghai (CN)</span>
-            <span class="text-[10px] bg-rose-950/50 text-rose-400 px-1.5 py-0.5 rounded border border-rose-900/40">Critical</span>
-        </div>
-    </div>
-    <div class="bg-[#111827] border border-gray-800/80 rounded-xl p-5">
-        <span class="text-xs text-gray-500 font-medium block">Operational Efficiency</span>
-        <div class="flex items-baseline justify-between mt-2">
-            <span class="text-3xl font-bold text-emerald-400">94.8%</span>
-            <span class="text-[10px] bg-emerald-950/50 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-900/30">Optimal</span>
-        </div>
-    </div>
-</div>
+    <section class="port-stats">
+        <article class="port-stat"><span>Total pelabuhan</span><strong>{{ number_format($ports->total()) }}</strong><em>Global directory</em></article>
+        <article class="port-stat"><span>Cakupan negara</span><strong>{{ number_format($countryCoverage) }}</strong><em>Negara & teritori</em></article>
+        <article class="port-stat"><span>Pelabuhan besar</span><strong>{{ number_format($largePorts) }}</strong><em>Harbor size L</em></article>
+        <article class="port-stat"><span>Memiliki koordinat</span><strong>{{ number_format($locatedPorts) }}</strong><em>Siap dipetakan</em></article>
+    </section>
 
-<!-- Tabel Utama Ports -->
-<div class="bg-[#111827] border border-gray-800/80 rounded-xl overflow-hidden shadow-sm">
-    <div class="p-6 border-b border-gray-800/60 flex justify-between items-center">
-        <h3 class="text-base font-bold text-white">Maritime Gateway Status Intelligence</h3>
-        <span class="text-xs text-gray-500">Live congestion matrix (250+ Hubs Loop)</span>
-    </div>
-    <div class="overflow-x-auto h-[500px] overflow-y-auto">
-        <table class="w-full text-left border-collapse">
-            <thead class="sticky top-0 z-10">
-                <tr class="text-xs text-gray-500 bg-[#111827] border-b border-gray-800">
-                    <th class="p-4 font-semibold">Port Name</th>
-                    <th class="p-4 font-semibold">Country</th>
-                    <th class="p-4 font-semibold">UN/LOCODE</th>
-                    <th class="p-4 font-semibold">Avg Waiting Time</th>
-                    <th class="p-4 font-semibold text-center">Congestion Level</th>
-                </tr>
-            </thead>
-            <tbody class="text-sm divide-y divide-gray-800/40">
-                @php
-                    // Array acuan data pelabuhan utama dunia lek
-                    $basePorts = [
-                        ['name' => 'Port of Singapore', 'country' => '🇸🇬 Singapore', 'code' => 'SGSIN', 'time' => '14.5 Hours', 'status' => 'Low Congestion', 'badge' => 'text-emerald-400 bg-emerald-950/50 border-emerald-900/40'],
-                        ['name' => 'Port of Shanghai', 'country' => '🇨🇳 China', 'code' => 'CNSHA', 'time' => '48.2 Hours', 'status' => 'Critical Threat', 'badge' => 'text-rose-400 bg-rose-950/50 border-rose-900/40'],
-                        ['name' => 'Tanjung Priok', 'country' => '🇮🇩 Indonesia', 'code' => 'IDTPP', 'time' => '22.0 Hours', 'status' => 'Medium Alert', 'badge' => 'text-amber-400 bg-amber-950/50 border-amber-900/40'],
-                        ['name' => 'Port of Rotterdam', 'country' => '🇳🇱 Netherlands', 'code' => 'NLRTM', 'time' => '18.1 Hours', 'status' => 'Low Congestion', 'badge' => 'text-emerald-400 bg-emerald-950/50 border-emerald-900/40'],
-                        ['name' => 'Port of Los Angeles', 'country' => '🇺🇸 United States', 'code' => 'USLAX', 'time' => '36.8 Hours', 'status' => 'High Alert', 'badge' => 'text-rose-400 bg-rose-950/50 border-rose-900/40'],
-                    ];
-                @endphp
-
-                {{-- Kita loop sampai 250+ baris biar rimbun dan mantap lek --}}
-                @for ($i = 0; $i < 255; $i++)
-                    @php $port = $basePorts[$i % count($basePorts)]; @endphp
-                    <tr class="hover:bg-gray-800/20 transition">
-                        <td class="p-4 font-medium text-gray-200">
-                            {{ $port['name'] }} @if($i >= count($basePorts)) Terminal {{ chr(65 + ($i % 4)) }} @endif
-                        </td>
-                        <td class="p-4 text-gray-400">{{ $port['country'] }}</td>
-                        <td class="p-4 text-gray-500 font-mono text-xs">{{ $port['code'] }}-{{ 100 + $i }}</td>
-                        <td class="p-4 text-gray-300 font-medium">{{ $port['time'] }}</td>
-                        <td class="p-4 text-center">
-                            <span class="text-[10px] border px-2 py-0.5 rounded font-semibold {{ $port['badge'] }}">
-                                {{ $port['status'] }}
-                            </span>
-                        </td>
-                    </tr>
-                @endfor
-            </tbody>
-        </table>
-    </div>
+    <form class="port-tools">
+        <div class="search-shell"><input name="q" value="{{ request('q') }}" placeholder="Cari nama pelabuhan, negara, atau nomor WPI..."><button aria-label="Cari">⌕</button></div><div class="source-pill">NGA WPI · UNECE UN/LOCODE</div>
+    </form>
+    <div class="result-note">Menampilkan {{ $ports->firstItem() ?? 0 }}–{{ $ports->lastItem() ?? 0 }} dari {{ number_format($ports->total()) }} hasil</div>
+    <section class="port-table-card"><table class="port-table"><thead><tr><th>Pelabuhan</th><th>Negara</th><th>WPI / Source ID</th><th>Ukuran</th><th>Koordinat</th><th>Aksi</th></tr></thead><tbody>
+        @forelse($ports as $p)
+            @php $code = strtolower($p->country?->code_iso2 ?? $p->country_code ?? ''); $size = strtoupper($p->harbor_size ?: 'X'); @endphp
+            <tr><td><div class="port-identity"><div class="port-thumb">⚓</div><div class="port-name"><strong>{{ $p->port_name }}</strong><span>{{ $p->harbor_type ?: 'Maritime location' }}</span></div></div></td><td><div class="country-cell">@if(strlen($code)===2)<img src="https://flagcdn.com/w80/{{ $code }}.png" alt="" onerror="this.style.display='none'">@endif<span>{{ $p->country_name ?: $p->country?->name ?: '—' }}</span></div></td><td><span class="source-badge">{{ $p->wpi_number ?: $p->port_code ?: '—' }}</span></td><td><span class="size-badge size-{{ $size }}">{{ $p->harbor_size ?: 'N/A' }}</span></td><td><span class="coordinates">{{ $p->latitude !== null ? number_format($p->latitude,4) : '—' }}, {{ $p->longitude !== null ? number_format($p->longitude,4) : '—' }}</span></td><td>@if($p->latitude !== null && $p->longitude !== null)<a class="location-link" href="https://www.openstreetmap.org/?mlat={{ $p->latitude }}&mlon={{ $p->longitude }}#map=10/{{ $p->latitude }}/{{ $p->longitude }}" target="_blank" rel="noopener">Lihat lokasi ↗</a>@else<span class="coordinates">Belum tersedia</span>@endif</td></tr>
+        @empty<tr><td colspan="6" class="empty-port">Pelabuhan yang dicari tidak ditemukan.</td></tr>@endforelse
+    </tbody></table></section><div class="pagination-wrap">{{ $ports->links() }}</div>
 </div>
 @endsection

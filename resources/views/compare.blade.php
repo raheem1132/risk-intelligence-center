@@ -1,245 +1,27 @@
 @extends('layouts.app')
-
 @section('content')
-<!-- Header Konten -->
-<div class="mb-8">
-    <h2 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-        🔄 Cross-Border Comparison (Global Database)
-    </h2>
-    <p class="text-sm text-gray-400 mt-1">Side-by-side supply chain risk assessment between 250+ global jurisdictions</p>
+<style>
+    .compare-page{max-width:1540px;margin:auto;color:#eef5ff}.compare-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:20px}.compare-kicker{color:#35e6b1;font-size:.69rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase}.compare-head h1{font-size:2.25rem;font-weight:850;letter-spacing:-.04em;margin:7px 0}.compare-head p{color:#8fa0b7;margin:0;font-size:.84rem}.method-pill{padding:9px 14px;border:1px solid #2b4058;border-radius:99px;background:#0d1725;color:#aabbd0;font-size:.68rem}
+    .selector-shell{display:grid;grid-template-columns:1fr 62px 1fr;gap:12px;align-items:center;padding:15px;background:#0d1725;border:1px solid #26384e;border-radius:18px;margin-bottom:16px}.select-field label{display:block;color:#7f91a9;font-size:.62rem;text-transform:uppercase;letter-spacing:.11em;margin:0 0 7px}.select-field select{width:100%;height:50px;border:1px solid #2c4059;background:#09131f;color:#fff;border-radius:12px;padding:0 14px;outline:none}.select-field select:focus{border-color:#35e6b1}.versus{width:51px;height:51px;border-radius:50%;display:grid;place-items:center;margin:auto;background:linear-gradient(135deg,#35e6b1,#37c8ff);color:#06131a;font-size:.72rem;font-weight:900;box-shadow:0 0 28px rgba(53,230,177,.18)}
+    .country-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}.country-card{position:relative;overflow:hidden;padding:21px;background:linear-gradient(145deg,#111e30,#0b1421);border:1px solid #283a51;border-radius:19px}.country-card:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-65px;top:-85px;background:var(--accent);filter:blur(90px);opacity:.16}.country-top{position:relative;z-index:1;display:flex;gap:14px;align-items:center}.country-flag{width:74px;height:50px;object-fit:cover;border-radius:10px;border:1px solid #405068;background:#fff}.country-title h2{font-size:1.18rem;font-weight:850;margin:0}.country-title p{color:#8294ac;font-size:.68rem;margin:4px 0 0}.risk-summary{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding-top:16px;border-top:1px solid #24344a}.risk-number strong{display:block;font-size:1.75rem}.risk-number span{font-size:.63rem;color:#7c8ea7}.risk-status{padding:6px 10px;border-radius:99px;font-size:.64rem;font-weight:800}.low{background:#123c30;color:#42eab4}.medium{background:#443619;color:#ffd05a}.high{background:#421c29;color:#ff718a}.unknown{background:#1c2a3e;color:#8da1bb}.country-facts{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:14px}.fact{padding:10px;background:#09131f;border:1px solid #1f3046;border-radius:10px}.fact span{display:block;color:#7588a2;font-size:.6rem;margin-bottom:4px}.fact strong{font-size:.72rem}
+    .comparison-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}.compare-panel{background:#0d1725;border:1px solid #26384e;border-radius:19px;padding:20px;min-width:0}.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px}.panel-head h2{font-size:.94rem;font-weight:800;margin:0}.panel-head span{color:#74879f;font-size:.64rem}.metric-list{display:flex;flex-direction:column}.metric-row{display:grid;grid-template-columns:1fr 130px 90px 130px;gap:10px;align-items:center;padding:14px 0;border-bottom:1px solid #1e2d42}.metric-row:last-child{border:0}.metric-name{font-size:.72rem;color:#8698af}.metric-value{font-size:.76rem;font-weight:750}.metric-value.right{text-align:right}.delta{text-align:center;font-size:.61rem;color:#788ba3}.winner{color:#42e5b2}.chart-wrap{height:310px}.insight{margin-top:14px;padding:13px;border:1px solid #29405a;border-radius:12px;background:#101d2e;color:#8fa2ba;font-size:.7rem;line-height:1.55}.insight strong{color:#42e5b2}.loading{opacity:.48;pointer-events:none}.error-box{color:#ff7b91;font-size:.72rem;margin-bottom:12px}
+    @media(max-width:1050px){.comparison-grid{grid-template-columns:1fr}.country-facts{grid-template-columns:1fr 1fr}}@media(max-width:700px){.compare-head{align-items:flex-start;flex-direction:column}.selector-shell{grid-template-columns:1fr}.versus{width:38px;height:38px}.country-cards{grid-template-columns:1fr}.metric-row{grid-template-columns:1fr 1fr}.metric-name{grid-column:span 2}.delta{display:none}}
+</style>
+<div class="compare-page" id="compareApp">
+    <header class="compare-head"><div><div class="compare-kicker">Strategic Benchmarking</div><h1>Country Comparison Studio</h1><p>Bandingkan kekuatan ekonomi dan eksposur risiko supply chain secara berdampingan.</p></div><div class="method-pill">Risk model · Weather 30% · News 40%</div></header>
+    <section class="selector-shell"><div class="select-field"><label>Negara pembanding A</label><select id="left"></select></div><div class="versus">VS</div><div class="select-field"><label>Negara pembanding B</label><select id="right"></select></div></section><div id="message" class="error-box"></div>
+    <section class="country-cards"><article class="country-card" id="leftCard" style="--accent:#35e6b1"></article><article class="country-card" id="rightCard" style="--accent:#9878ff"></article></section>
+    <section class="comparison-grid"><article class="compare-panel"><div class="panel-head"><h2>Executive Metric Comparison</h2><span>Snapshot terbaru database</span></div><div class="metric-list" id="metrics"></div><div class="insight" id="insight"></div></article><article class="compare-panel"><div class="panel-head"><h2>Risk Exposure Radar</h2><span>Semakin rendah semakin baik</span></div><div class="chart-wrap"><canvas id="riskRadar"></canvas></div></article></section>
 </div>
-
-<!-- Selector Dropdown Negara -->
-<div class="bg-[#111827] border border-gray-800/80 rounded-xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
-    <!-- Base Country Selector -->
-    <div class="w-full flex-1">
-        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Base Country</label>
-        <select id="baseSelect" onchange="updateComparison()" class="w-full bg-[#0B0F17] border border-gray-800 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 transition">
-            <!-- Diisi otomatis oleh JavaScript -->
-        </select>
-    </div>
-
-    <!-- VS Badge -->
-    <div class="w-10 h-10 rounded-full bg-emerald-950/40 border border-emerald-900/60 flex items-center justify-center text-xs font-bold text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-        VS
-    </div>
-
-    <!-- Target Country Selector -->
-    <div class="w-full flex-1">
-        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Target Country</label>
-        <select id="targetSelect" onchange="updateComparison()" class="w-full bg-[#0B0F17] border border-gray-800 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 transition">
-            <!-- Diisi otomatis oleh JavaScript -->
-        </select>
-    </div>
-</div>
-
-<!-- Layout Komparasi Head-to-Head -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Card Kiri: Base Country Data -->
-    <div class="bg-[#111827] border border-gray-800/80 rounded-xl p-8 text-center flex flex-col justify-between shadow-sm">
-        <div>
-            <span class="text-4xl font-black text-gray-700 tracking-wider font-mono block mb-2" id="baseCode">--</span>
-            <h3 class="text-xl font-bold text-white" id="baseName">Loading...</h3>
-            <span class="text-xs text-gray-500 block mt-1" id="baseRegion">--</span>
-        </div>
-        
-        <div class="bg-[#0B0F17] border border-gray-800/60 rounded-xl p-5 mt-6">
-            <span class="text-[10px] uppercase font-bold text-gray-500 tracking-wider block mb-1">Risk Score</span>
-            <span class="text-3xl font-black text-amber-400 font-mono block" id="baseTotalScore">0.00</span>
-            <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded mt-3 uppercase tracking-wider" id="baseBadge">Stable</span>
-        </div>
-    </div>
-
-    <!-- Card Tengah: Metric Head to Head Bars -->
-    <div class="bg-[#111827] border border-gray-800/80 rounded-xl p-6 flex flex-col justify-center space-y-6 shadow-sm">
-        <div class="text-center border-b border-gray-800/60 pb-3 mb-2">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400">Metric Head-To-Head</h4>
-        </div>
-
-        <!-- Metric 1 -->
-        <div>
-            <div class="flex justify-between text-xs font-semibold text-gray-400 mb-2">
-                <span id="barEcoLeft">0.00</span>
-                <span class="text-gray-500 font-bold uppercase tracking-wider text-[10px]">Economic Stability</span>
-                <span id="barEcoRight">0.00</span>
-            </div>
-            <div class="h-2 w-full bg-[#0B0F17] rounded-full overflow-hidden flex">
-                <div id="barEcoLeftWidth" class="h-full bg-emerald-500 transition-all duration-500" style="width: 0%"></div>
-                <div class="h-full flex-1 bg-gray-900"></div>
-                <div id="barEcoRightWidth" class="h-full bg-rose-500 transition-all duration-500" style="width: 0%"></div>
-            </div>
-        </div>
-
-        <!-- Metric 2 -->
-        <div>
-            <div class="flex justify-between text-xs font-semibold text-gray-400 mb-2">
-                <span id="barInfLeft">0.00</span>
-                <span class="text-gray-500 font-bold uppercase tracking-wider text-[10px]">Logistics Infrastructure</span>
-                <span id="barInfRight">0.00</span>
-            </div>
-            <div class="h-2 w-full bg-[#0B0F17] rounded-full overflow-hidden flex">
-                <div id="barInfLeftWidth" class="h-full bg-emerald-500 transition-all duration-500" style="width: 0%"></div>
-                <div class="h-full flex-1 bg-gray-900"></div>
-                <div id="barInfRightWidth" class="h-full bg-amber-500 transition-all duration-500" style="width: 0%"></div>
-            </div>
-        </div>
-
-        <!-- Metric 3 -->
-        <div>
-            <div class="flex justify-between text-xs font-semibold text-gray-400 mb-2">
-                <span id="barGeoLeft">0.00</span>
-                <span class="text-gray-500 font-bold uppercase tracking-wider text-[10px]">Geopolitical Risk</span>
-                <span id="barGeoRight">0.00</span>
-            </div>
-            <div class="h-2 w-full bg-[#0B0F17] rounded-full overflow-hidden flex">
-                <div id="barGeoLeftWidth" class="h-full bg-emerald-500 transition-all duration-500" style="width: 0%"></div>
-                <div class="h-full flex-1 bg-gray-900"></div>
-                <div id="barGeoRightWidth" class="h-full bg-rose-500 transition-all duration-500" style="width: 0%"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Card Kanan: Target Country Data -->
-    <div class="bg-[#111827] border border-gray-800/80 rounded-xl p-8 text-center flex flex-col justify-between shadow-sm">
-        <div>
-            <span class="text-4xl font-black text-gray-700 tracking-wider font-mono block mb-2" id="targetCode">--</span>
-            <h3 class="text-xl font-bold text-white" id="targetName">Loading...</h3>
-            <span class="text-xs text-gray-500 block mt-1" id="targetRegion">--</span>
-        </div>
-        
-        <div class="bg-[#0B0F17] border border-gray-800/60 rounded-xl p-5 mt-6">
-            <span class="text-[10px] uppercase font-bold text-gray-500 tracking-wider block mb-1">Risk Score</span>
-            <span class="text-3xl font-black text-rose-400 font-mono block" id="targetTotalScore">0.00</span>
-            <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded mt-3 uppercase tracking-wider" id="targetBadge">Stable</span>
-        </div>
-    </div>
-</div>
-
 <script>
-    // Master data 250+ Negara & Wilayah di Dunia
-    const countriesGlobal = [
-        {code:"ID", name:"Indonesia", region:"Southeast Asia"}, {code:"SG", name:"Singapore", region:"Southeast Asia"}, {code:"MY", name:"Malaysia", region:"Southeast Asia"}, {code:"TH", name:"Thailand", region:"Southeast Asia"}, {code:"PH", name:"Philippines", region:"Southeast Asia"}, {code:"VN", name:"Vietnam", region:"Southeast Asia"}, {code:"MM", name:"Myanmar", region:"Southeast Asia"}, {code:"KH", name:"Cambodia", region:"Southeast Asia"}, {code:"LA", name:"Laos", region:"Southeast Asia"}, {code:"BN", name:"Brunei", region:"Southeast Asia"}, {code:"TL", name:"East Timor", region:"Southeast Asia"},
-        {code:"JP", name:"Japan", region:"East Asia"}, {code:"KR", name:"South Korea", region:"East Asia"}, {code:"CN", name:"China", region:"East Asia"}, {code:"TW", name:"Taiwan", region:"East Asia"}, {code:"HK", name:"Hong Kong", region:"East Asia"}, {code:"MN", name:"Mongolia", region:"East Asia"},
-        {code:"US", name:"United States", region:"North America"}, {code:"CA", name:"Canada", region:"North America"}, {code:"MX", name:"Mexico", region:"North America"},
-        {code:"GB", name:"United Kingdom", region:"Western Europe"}, {code:"DE", name:"Germany", region:"Western Europe"}, {code:"FR", name:"France", region:"Western Europe"}, {code:"NL", name:"Netherlands", region:"Western Europe"}, {code:"BE", name:"Belgium", region:"Western Europe"}, {code:"CH", name:"Switzerland", region:"Western Europe"}, {code:"AT", name:"Austria", region:"Western Europe"}, {code:"IE", name:"Ireland", region:"Western Europe"},
-        {code:"UA", name:"Ukraine", region:"Eastern Europe"}, {code:"RU", name:"Russia", region:"North Eurasia"}, {code:"PL", name:"Poland", region:"Eastern Europe"}, {code:"RO", name:"Romania", region:"Eastern Europe"}, {code:"CZ", name:"Czech Republic", region:"Eastern Europe"}, {code:"HU", name:"Hungary", region:"Eastern Europe"}, {code:"BY", name:"Belarus", region:"Eastern Europe"},
-        {code:"IT", name:"Italy", region:"Southern Europe"}, {code:"ES", name:"Spain", region:"Southern Europe"}, {code:"PT", name:"Portugal", region:"Southern Europe"}, {code:"GR", name:"Greece", region:"Southern Europe"}, {code:"TR", name:"Turkey", region:"Southern Europe"},
-        {code:"AU", name:"Australia", region:"Oceania"}, {code:"NZ", name:"New Zealand", region:"Oceania"}, {code:"FJ", name:"Fiji", region:"Oceania"}, {code:"PG", name:"Papua New Guinea", region:"Oceania"},
-        {code:"IN", name:"India", region:"South Asia"}, {code:"PK", name:"Pakistan", region:"South Asia"}, {code:"BD", name:"Bangladesh", region:"South Asia"}, {code:"LK", name:"Sri Lanka", region:"South Asia"}, {code:"NP", name:"Nepal", region:"South Asia"},
-        {code:"SA", name:"Saudi Arabia", region:"Middle East"}, {code:"AE", name:"United Arab Emirates", region:"Middle East"}, {code:"IL", name:"Israel", region:"Middle East"}, {code:"IR", name:"Iran", region:"Middle East"}, {code:"IQ", name:"Iraq", region:"Middle East"}, {code:"QA", name:"Qatar", region:"Middle East"}, {code:"KW", name:"Kuwait", region:"Middle East"}, {code:"OM", name:"Oman", region:"Middle East"}, {code:"JO", name:"Jordan", region:"Middle East"}, {code:"LB", name:"Lebanon", region:"Middle East"}, {code:"YE", name:"Yemen", region:"Middle East"}, {code:"SY", name:"Syria", region:"Middle East"},
-        {code:"DZ", name:"Algeria", region:"North Africa"}, {code:"EG", name:"Egypt", region:"North Africa"}, {code:"MA", name:"Morocco", region:"North Africa"}, {code:"TN", name:"Tunisia", region:"North Africa"}, {code:"LY", name:"Libya", region:"North Africa"}, {code:"SD", name:"Sudan", region:"North Africa"},
-        {code:"ZA", name:"South Africa", region:"Southern Africa"}, {code:"NG", name:"Nigeria", region:"Western Africa"}, {code:"KE", name:"Kenya", region:"Eastern Africa"}, {code:"GH", name:"Ghana", region:"Western Africa"}, {code:"ET", name:"Ethiopia", region:"Eastern Africa"}, {code:"TZ", name:"Tanzania", region:"Eastern Africa"}, {code:"UG", name:"Uganda", region:"Eastern Africa"}, {code:"AO", name:"Angola", region:"Central Africa"}, {code:"CI", name:"Ivory Coast", region:"Western Africa"}, {code:"CM", name:"Cameroon", region:"Central Africa"}, {code:"ZW", name:"Zimbabwe", region:"Southern Africa"}, {code:"SO", name:"Somalia", region:"Eastern Africa"}, {code:"SD", name:"Sudan", region:"North Africa"}, {code:"SS", name:"South Sudan", region:"Eastern Africa"},
-        {code:"BR", name:"Brazil", region:"South America"}, {code:"AR", name:"Argentina", region:"South America"}, {code:"CL", name:"Chile", region:"South America"}, {code:"CO", name:"Colombia", region:"South America"}, {code:"PE", name:"Peru", region:"South America"}, {code:"VE", name:"Venezuela", region:"South America"}, {code:"EC", name:"Ecuador", region:"South America"}, {code:"BO", name:"Bolivia", region:"South America"}, {code:"PY", name:"Paraguay", region:"South America"}, {code:"UY", name:"Uruguay", region:"South America"},
-        {code:"CU", name:"Cuba", region:"Caribbean"}, {code:"JM", name:"Jamaica", region:"Caribbean"}, {code:"PR", name:"Puerto Rico", region:"Caribbean"}, {code:"CR", name:"Costa Rica", region:"Central America"}, {code:"PA", name:"Panama", region:"Central America"}, {code:"GT", name:"Guatemala", region:"Central America"}, {code:"HN", name:"Honduras", region:"Central America"},
-        {code:"KZ", name:"Kazakhstan", region:"Central Asia"}, {code:"UZ", name:"Uzbekistan", region:"Central Asia"}, {code:"TM", name:"Turkmenistan", region:"Central Asia"}, {code:"KG", name:"Kyrgyzstan", region:"Central Asia"}, {code:"TJ", name:"Tajikistan", region:"Central Asia"},
-        {code:"DK", name:"Denmark", region:"Northern Europe"}, {code:"FI", name:"Finland", region:"Northern Europe"}, {code:"NO", name:"Norway", region:"Northern Europe"}, {code:"SE", name:"Sweden", region:"Northern Europe"}, {code:"IS", name:"Iceland", region:"Northern Europe"}
-    ];
-
-    // Mengisi data tambahan otomatis agar total pas 250+ negara variatif tanpa menulis panjang
-    const extraSpecs = ["AF","AL","AD","AM","AW","AZ","BS","BH","BB","BM","BT","BA","BW","BV","IO","VG","AI","AG","AS","AX","BQ","CC","CK","CW","CX","CY","DM","ER","EE","FK","FO","GF","PF","TF","GA","GM","GE","GI","GL","GD","GP","GU","GG","GN","GW","GY","HT","HM","VA","HU","IM","JE","KI","KP","LV","LS","LR","LI","LT","LU","MO","MK","MG","MW","MV","ML","MT","MH","MQ","MR","MU","YT","FM","MD","MC","MS","MZ","NA","NR","NC","NI","NE","NU","NF","MP","PW","PS","PY","RE","BL","SH","KN","LC","MF","PM","VC","WS","SM","ST","SN","RS","SC","SL","SX","SK","SI","SB","GS","LK","SD","SR","SJ","SZ","SE","CH","SY","TJ","TZ","TG","TK","TO","TT","TN","TM","TC","TV","UG","UM","VI","UY","VU","WF","EH","ZM"];
-    extraSpecs.forEach((code, index) => {
-        countriesGlobal.push({
-            code: code,
-            name: `Jurisdiction (${code})`,
-            region: index % 4 === 0 ? "Global Island Nodes" : (index % 4 === 1 ? "Territorial Trade Corridor" : (index % 4 === 2 ? "Emerging Frontier" : "Continental Link"))
-        });
-    });
-
-    // Fungsi penghitung generator risiko cerdas biar nilainya unik tiap negara
-    function generateRiskMetrics(code, region) {
-        let charCodeSum = code.charCodeAt(0) + code.charCodeAt(1);
-        let baseSeed = (charCodeSum % 70) + 5; // Rentang 5 - 75
-        
-        // Penyesuaian bobot berbasis zona regional
-        if(["Middle East", "Eastern Europe", "North Eurasia", "Eastern Africa", "Central Africa"].includes(region)) {
-            baseSeed += 20; 
-        } else if(["Western Europe", "Northern Europe", "North America", "Oceania"].includes(region)) {
-            baseSeed = Math.max(2, baseSeed - 30);
-        }
-
-        let eco = Math.min(98, Math.max(1, baseSeed + (charCodeSum % 11)));
-        let inf = Math.min(98, Math.max(1, baseSeed - (charCodeSum % 7)));
-        let geo = Math.min(98, Math.max(1, baseSeed + (charCodeSum % 17) - 5));
-        let totalScore = (eco + inf + geo) / 3;
-
-        let badge = "Low Risk";
-        let color = "text-emerald-400";
-        if (totalScore > 50) { badge = "Critical Threat"; color = "text-rose-400"; }
-        else if (totalScore > 20) { badge = "Medium Threat"; color = "text-amber-400"; }
-
-        return { score: totalScore, eco, inf, geo, badge, color };
-    }
-
-    // Inisialisasi Dropdown
-    function initDropdowns() {
-        const baseSelect = document.getElementById('baseSelect');
-        const targetSelect = document.getElementById('targetSelect');
-
-        countriesGlobal.sort((a,b) => a.name.localeCompare(b.name)).forEach(c => {
-            let opt1 = document.createElement('option');
-            opt1.value = c.code; opt1.innerText = `${c.code} ${c.name}`;
-            if(c.code === "ID") opt1.selected = true;
-            baseSelect.appendChild(opt1);
-
-            let opt2 = document.createElement('option');
-            opt2.value = c.code; opt2.innerText = `${c.code} ${c.name}`;
-            if(c.code === "DZ") opt2.selected = true;
-            targetSelect.appendChild(opt2);
-        });
-
-        updateComparison();
-    }
-
-    function updateComparison() {
-        const baseKey = document.getElementById('baseSelect').value;
-        const targetKey = document.getElementById('targetSelect').value;
-
-        const baseMeta = countriesGlobal.find(c => c.code === baseKey);
-        const targetMeta = countriesGlobal.find(c => c.code === targetKey);
-
-        const base = generateRiskMetrics(baseKey, baseMeta.region);
-        const target = generateRiskMetrics(targetKey, targetMeta.region);
-
-        // Update Blok Kiri (Base)
-        document.getElementById('baseCode').innerText = baseKey;
-        document.getElementById('baseName').innerText = baseMeta.name;
-        document.getElementById('baseRegion').innerText = baseMeta.region;
-        document.getElementById('baseTotalScore').innerText = base.score.toFixed(2);
-        document.getElementById('baseTotalScore').className = `text-3xl font-black font-mono block ${base.color}`;
-        
-        const bBadge = document.getElementById('baseBadge');
-        bBadge.innerText = base.badge;
-        bBadge.className = `inline-block text-[10px] font-bold px-2 py-0.5 rounded mt-3 border uppercase tracking-wider ${base.score > 50 ? 'text-rose-400 bg-rose-950/40 border-rose-900/40' : (base.score > 20 ? 'text-amber-400 bg-amber-950/40 border-amber-900/40' : 'text-emerald-400 bg-emerald-950/40 border-emerald-900/40')}`;
-
-        // Update Blok Kanan (Target)
-        document.getElementById('targetCode').innerText = targetKey;
-        document.getElementById('targetName').innerText = targetMeta.name;
-        document.getElementById('targetRegion').innerText = targetMeta.region;
-        document.getElementById('targetTotalScore').innerText = target.score.toFixed(2);
-        document.getElementById('targetTotalScore').className = `text-3xl font-black font-mono block ${target.color}`;
-        
-        const tBadge = document.getElementById('targetBadge');
-        tBadge.innerText = target.badge;
-        tBadge.className = `inline-block text-[10px] font-bold px-2 py-0.5 rounded mt-3 border uppercase tracking-wider ${target.score > 50 ? 'text-rose-400 bg-rose-950/40 border-rose-900/40' : (target.score > 20 ? 'text-amber-400 bg-amber-950/40 border-amber-900/40' : 'text-emerald-400 bg-emerald-950/40 border-emerald-900/40')}`;
-
-        // Update Progress Bar Tengah
-        document.getElementById('barEcoLeft').innerText = base.eco.toFixed(2);
-        document.getElementById('barEcoRight').innerText = target.eco.toFixed(2);
-        document.getElementById('barEcoLeftWidth').style.width = base.eco + '%';
-        document.getElementById('barEcoRightWidth').style.width = target.eco + '%';
-
-        document.getElementById('barInfLeft').innerText = base.inf.toFixed(2);
-        document.getElementById('barInfRight').innerText = target.inf.toFixed(2);
-        document.getElementById('barInfLeftWidth').style.width = base.inf + '%';
-        document.getElementById('barInfRightWidth').style.width = target.inf + '%';
-
-        document.getElementById('barGeoLeft').innerText = base.geo.toFixed(2);
-        document.getElementById('barGeoRight').innerText = target.geo.toFixed(2);
-        document.getElementById('barGeoLeftWidth').style.width = base.geo + '%';
-        document.getElementById('barGeoRightWidth').style.width = target.geo + '%';
-    }
-
-    // Jalankan inisialisasi saat halaman selesai dimuat
-    window.onload = initDropdowns;
+document.addEventListener('DOMContentLoaded',function(){
+ let countries=[],chart,requestId=0;const app=document.getElementById('compareApp'),left=document.getElementById('left'),right=document.getElementById('right'),message=document.getElementById('message');
+ const num=v=>Number(v||0),compact=v=>v?new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:2}).format(num(v)):'—',pct=v=>v!==null&&v!==undefined?num(v).toFixed(2)+'%':'—';
+ const riskClass=s=>(s||'').toLowerCase().startsWith('low')?'low':((s||'').toLowerCase().startsWith('medium')?'medium':((s||'').toLowerCase().startsWith('high')?'high':'unknown'));
+ function card(c){const r=c.risk||{};return `<div class="country-top"><img class="country-flag" src="https://flagcdn.com/w160/${c.code_iso2.toLowerCase()}.png" onerror="this.style.visibility='hidden'"><div class="country-title"><h2>${c.name}</h2><p>${c.region||'Wilayah belum tersedia'} · ${c.code_iso2}</p></div></div><div class="country-facts"><div class="fact"><span>GDP</span><strong>${compact(c.gdp)}</strong></div><div class="fact"><span>Populasi</span><strong>${compact(c.population)}</strong></div><div class="fact"><span>Mata uang</span><strong>${c.currency_code||'—'}</strong></div></div><div class="risk-summary"><div class="risk-number"><strong>${r.total_score??'—'}</strong><span>COMPOSITE RISK</span></div><span class="risk-status ${riskClass(r.status)}">${r.status||'Belum dinilai'}</span></div>`}
+ function metric(name,a,b,lowerBetter=false,format=v=>v){const av=num(a),bv=num(b),equal=av===bv,leftWin=lowerBetter?av<bv:av>bv,rightWin=lowerBetter?bv<av:bv>av,delta=Math.abs(av-bv);return `<div class="metric-row"><span class="metric-name">${name}</span><span class="metric-value ${leftWin&&!equal?'winner':''}">${format(a)}</span><span class="delta">Δ ${format(delta)}</span><span class="metric-value right ${rightWin&&!equal?'winner':''}">${format(b)}</span></div>`}
+ async function compare(){const id=++requestId;if(!left.value||!right.value)return;app.classList.add('loading');message.textContent='';try{const responses=await Promise.all([left.value,right.value].map(code=>fetch(`/api/countries/${code}`).then(r=>{if(!r.ok)throw new Error('Data negara gagal dimuat');return r.json()})));if(id!==requestId)return;const [a,b]=responses.map(r=>r.data);document.getElementById('leftCard').innerHTML=card(a);document.getElementById('rightCard').innerHTML=card(b);document.getElementById('metrics').innerHTML=metric('Gross Domestic Product',a.gdp,b.gdp,false,compact)+metric('Population',a.population,b.population,false,compact)+metric('Inflation Rate',a.inflation_rate,b.inflation_rate,true,pct)+metric('Composite Risk',a.risk?.total_score,b.risk?.total_score,true,v=>num(v).toFixed(1));const ar=num(a.risk?.total_score),br=num(b.risk?.total_score),sa=ar<=br?a:b,sb=ar<=br?b:a;document.getElementById('insight').innerHTML=`<strong>${sa.name}</strong> memiliki profil risiko lebih rendah ${Math.abs(ar-br).toFixed(1)} poin dibanding ${sb.name}. Gunakan indikator ekonomi dan breakdown risiko sebagai bahan analisis, bukan satu-satunya dasar keputusan.`;chart?.destroy();chart=new Chart(document.getElementById('riskRadar'),{type:'radar',data:{labels:['Cuaca','Inflasi','Kurs','Berita'],datasets:[{label:a.name,data:[a.risk?.weather_risk||0,a.risk?.inflation_risk||0,a.risk?.currency_risk||0,a.risk?.news_risk||0],borderColor:'#35e6b1',backgroundColor:'rgba(53,230,177,.15)',pointBackgroundColor:'#35e6b1'},{label:b.name,data:[b.risk?.weather_risk||0,b.risk?.inflation_risk||0,b.risk?.currency_risk||0,b.risk?.news_risk||0],borderColor:'#9878ff',backgroundColor:'rgba(152,120,255,.14)',pointBackgroundColor:'#9878ff'}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{beginAtZero:true,max:100,grid:{color:'rgba(130,150,175,.16)'},angleLines:{color:'rgba(130,150,175,.16)'},pointLabels:{color:'#a9bad0'},ticks:{display:false}}},plugins:{legend:{labels:{color:'#a9bad0',usePointStyle:true}}}}})}catch(e){if(id===requestId)message.textContent=e.message+'. Coba pilih kembali negara.'}finally{if(id===requestId)app.classList.remove('loading')}}
+ async function load(){const response=await fetch('/api/countries'),json=await response.json();countries=(json.data||[]).sort((a,b)=>a.name.localeCompare(b.name));const options=countries.map(c=>`<option value="${c.code_iso2}">${c.code_iso2} — ${c.name}</option>`).join('');left.innerHTML=right.innerHTML=options;left.value=countries.some(c=>c.code_iso2==='ID')?'ID':countries[0]?.code_iso2;right.value=countries.some(c=>c.code_iso2==='DE')?'DE':countries[1]?.code_iso2;left.addEventListener('change',compare);right.addEventListener('change',compare);compare()}load().catch(()=>message.textContent='Data belum tersedia. Jalankan sinkronisasi negara terlebih dahulu.');
+});
 </script>
 @endsection

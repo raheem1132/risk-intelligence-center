@@ -3,67 +3,32 @@
 namespace App\Services;
 
 use App\Models\Country;
+use App\Models\RiskScore;
 
 class RiskScoringService
 {
-    /**
-     * Menghitung rincian risiko dan status untuk satu negara.
-     */
-    public function calculateRisk(Country $country): array
+    public function __construct(private readonly GlobalDataService $data, private readonly NewsService $news) {}
+
+    public function calculateRisk(Country $country, bool $refresh = false): array
     {
-        // Deterministic seeding agar skor konsisten per ID negara
-        mt_srand($country->id);
-        
-        $weatherRisk       = mt_rand(10, 80);
-        $inflationRisk     = mt_rand(15, 90);
-        $newsSentimentRisk = mt_rand(5, 75);
-        $currencyRisk      = mt_rand(20, 60);
-
-        // Rumus pembobotan profesional (Weighting Matrix)
-        $totalRiskScore = round(
-            ($weatherRisk * 0.30) + 
-            ($inflationRisk * 0.20) + 
-            ($newsSentimentRisk * 0.40) + 
-            ($currencyRisk * 0.10)
-        );
-
-        // Klasifikasi Tingkat Risiko (Thresholding)
-        if ($totalRiskScore < 35) {
-            $status = 'Low Risk';
-            $badgeColor = 'bg-green-900/50 text-green-400 border-green-700';
-        } elseif ($totalRiskScore <= 65) {
-            $status = 'Medium Risk';
-            $badgeColor = 'bg-yellow-900/50 text-yellow-400 border-yellow-700';
-        } else {
-            $status = 'High Risk';
-            $badgeColor = 'bg-red-900/50 text-red-400 border-red-700';
-        }
-
-        return [
-            'country_id'       => $country->id,
-            'country_name'     => $country->name,
-            'code_iso2'        => $country->code_iso2,
-            'breakdown'        => [
-                'weather_risk'        => $weatherRisk,
-                'inflation_risk'      => $inflationRisk,
-                'news_sentiment_risk' => $newsSentimentRisk,
-                'currency_risk'       => $currencyRisk,
-            ],
-            'total_risk_score' => $totalRiskScore,
-            'status'           => $status,
-            'badge_class'      => $badgeColor
-        ];
+        if ($refresh) $this->data->syncCountry($country);
+        $weather = $country->weatherSnapshots()->latest('observed_at')->first();
+        $currency = $country->currencySnapshots()->latest('observed_at')->first();
+        $weatherRisk = (int)($weather?->risk_score ?? 25);
+        $inflation = (float)($country->inflation_rate ?? 3);
+        $inflationRisk = (int)min(100, max(0, abs($inflation) * 6));
+        $currencyRisk = (int)min(100, abs((float)($currency?->change_percent ?? 0)) * 15);
+        $articles = $this->news->fetchAndAnalyzeNews($country->code_iso2, 'logistics trade shipping economy');
+        $negative = collect($articles)->avg(fn ($article) => $article['sentiment']['negative_pct'] ?? 0);
+        $newsRisk = (int)round($negative ?? 20);
+        $total = (int)round($weatherRisk*.30 + $inflationRisk*.20 + $newsRisk*.40 + $currencyRisk*.10);
+        $status = $total < 35 ? 'Low Risk' : ($total <= 65 ? 'Medium Risk' : 'High Risk');
+        $score = RiskScore::create(['country_id'=>$country->id,'weather_risk'=>$weatherRisk,'inflation_risk'=>$inflationRisk,'currency_risk'=>$currencyRisk,'news_risk'=>$newsRisk,'total_score'=>$total,'status'=>$status]);
+        return ['country_id'=>$country->id,'country_name'=>$country->name,'code_iso2'=>$country->code_iso2,'breakdown'=>['weather_risk'=>$weatherRisk,'inflation_risk'=>$inflationRisk,'news_sentiment_risk'=>$newsRisk,'currency_risk'=>$currencyRisk],'weights'=>['weather'=>30,'inflation'=>20,'news'=>40,'currency'=>10],'total_risk_score'=>$total,'status'=>$status,'calculated_at'=>$score->created_at->toIso8601String()];
     }
 
-    /**
-     * Memproses koleksi data banyak negara sekaligus.
-     */
-    public function getRiskDataCollection($countries): array
+    public function getRiskDataCollection($countries, bool $refresh = false): array
     {
-        $collection = [];
-        foreach ($countries as $country) {
-            $collection[] = $this->calculateRisk($country);
-        }
-        return $collection;
+        return $countries->map(fn (Country $country) => $this->calculateRisk($country, $refresh))->all();
     }
 }

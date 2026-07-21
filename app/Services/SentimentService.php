@@ -13,7 +13,7 @@ class SentimentService
         }
 
         // Ambil kamus kata dari database
-        $dictionaries = DB::table('sentiment_dictionaries')->get();
+        $dictionaries = DB::table('sentiment_words')->get();
         
         $positiveScore = 0;
         $negativeScore = 0;
