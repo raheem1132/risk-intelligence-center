@@ -16,9 +16,10 @@ Route::view('/', 'login')->name('login');
 Route::view('/register', 'register')->name('register');
 
 Route::post('/register', function (Request $request) {
-    $data = $request->validate(['name'=>['required','string','max:255'],'email'=>['required','email','max:255','unique:users,email'],'password'=>['required','string','min:8']]);
-    $user = User::create($data); Auth::login($user); $request->session()->regenerate();
-    return redirect()->route('dashboard');
+    $data = $request->validate(['name'=>['required','string','max:255'],'email'=>['required','email','max:255','unique:users,email'],'password'=>['required','string','min:8','confirmed']]);
+    User::create($data);
+
+    return redirect()->route('login')->with('status', 'Account created successfully. Please sign in to continue.');
 });
 Route::post('/login', function (Request $request) {
     $credentials=$request->validate(['email'=>['required','email'],'password'=>['required','string']]);

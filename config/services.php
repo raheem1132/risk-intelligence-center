@@ -41,5 +41,8 @@ return [
     'restcountries' => [
         'key' => env('REST_COUNTRIES_API_KEY'),
     ],
+    'ais' => [
+        'bridge_url' => env('AIS_BRIDGE_URL'),
+    ],
 
 ];

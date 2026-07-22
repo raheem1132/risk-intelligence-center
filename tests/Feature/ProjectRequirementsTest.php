@@ -25,13 +25,13 @@ class ProjectRequirementsTest extends TestCase
         $this->getJson('/api/news?country=ID')->assertOk()->assertJsonPath('status', 'success');
     }
 
-    public function test_registration_creates_a_real_authenticated_user(): void
+    public function test_registration_creates_an_account_then_requires_login(): void
     {
         $this->post('/register', [
-            'name' => 'Supply Analyst', 'email' => 'analyst@example.com', 'password' => 'password123',
-        ])->assertRedirect('/dashboard');
+            'name' => 'Supply Analyst', 'email' => 'analyst@example.com', 'password' => 'password123', 'password_confirmation' => 'password123',
+        ])->assertRedirect('/');
 
-        $this->assertAuthenticated();
+        $this->assertGuest();
         $this->assertDatabaseHas('users', ['email' => 'analyst@example.com']);
     }
 

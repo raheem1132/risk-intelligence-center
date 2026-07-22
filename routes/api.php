@@ -34,6 +34,7 @@ Route::get('/currency', [CurrencyController::class, 'index']);
 Route::get('/overview', [DataController::class, 'overview']);
 Route::post('/countries/{code}/sync', [DataController::class, 'sync']);
 Route::get('/countries/{code}/economy', [DataController::class, 'economy']);
+Route::post('/countries/{code}/economy/refresh', [DataController::class, 'refreshEconomy']);
 Route::get('/countries/{code}/weather', [DataController::class, 'weather']);
 Route::get('/countries/{code}/currency-trend', [DataController::class, 'currency']);
 Route::get('/countries/{code}/risk-trend', [DataController::class, 'riskTrend']);
