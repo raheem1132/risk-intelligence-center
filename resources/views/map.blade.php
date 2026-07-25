@@ -63,7 +63,15 @@ clusters.addTo(map);countries.addTo(map);L.control.layers(null,{'⚓ Pelabuhan':
 portCount.textContent=ports.length.toLocaleString();countryCount.textContent=Object.keys(countryData).length.toLocaleString();
 const portOptions=document.getElementById('portOptions');
 const portLookup=new Map();
-ports.forEach((p,index)=>{if(!Number.isFinite(p.lat)||!Number.isFinite(p.lng))return;const label=`${p.name} — ${p.country||p.code||'Unknown'} [${index}]`;portLookup.set(label,p);const option=document.createElement('option');option.value=label;portOptions.appendChild(option)});
+const portEntries=[];
+ports.forEach((p,index)=>{if(!Number.isFinite(p.lat)||!Number.isFinite(p.lng))return;const label=`${p.name} — ${p.country||p.code||'Unknown'} [${index}]`;portLookup.set(label,p);portEntries.push({label,search:label.toLocaleLowerCase(),port:p})});
+function refreshPortOptions(value=''){
+ const term=value.trim().toLocaleLowerCase();
+ const matches=(term?portEntries.filter(entry=>entry.search.includes(term)):portEntries).slice(0,100);
+ portOptions.replaceChildren(...matches.map(entry=>{const option=document.createElement('option');option.value=entry.label;return option}));
+}
+['originPort','destinationPort'].forEach(id=>{const input=document.getElementById(id);input.addEventListener('focus',()=>refreshPortOptions(input.value));input.addEventListener('input',()=>refreshPortOptions(input.value))});
+refreshPortOptions();
 let plannedRoute=L.layerGroup().addTo(map);
 const money=value=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(value);
 const distance=value=>new Intl.NumberFormat('id-ID',{maximumFractionDigits:0}).format(value)+' km';
