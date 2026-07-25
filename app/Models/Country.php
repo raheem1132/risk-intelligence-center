@@ -15,7 +15,9 @@ class Country extends Model
         'language',
         'population',
         'gdp',
-        'inflation_rate'
+        'inflation_rate',
+        'latitude',
+        'longitude',
     ];
 
     /**
