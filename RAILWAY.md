@@ -55,4 +55,4 @@ Create one more service from the same repository for password/threshold email al
 - No public domain required
 - Reuse the same `APP_KEY`, database, cache, mail, and application variables as the App service
 
-Email delivery requires a real mail transport (`MAIL_MAILER=smtp` or a supported provider) plus its credentials. The `log` mailer does not deliver messages.
+Email delivery uses the Resend HTTPS API. Set `RESEND_API_KEY`, `MAIL_FROM_ADDRESS`, and `MAIL_FROM_NAME` on the App service. The Resend testing sender `onboarding@resend.dev` can only deliver to the email address that owns the Resend account; verify a domain for general delivery.

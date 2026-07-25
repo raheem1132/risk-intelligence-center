@@ -3,8 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
-use App\Notifications\RiskThresholdAlert;
-use App\Notifications\WeeklyRiskDigest;
+use App\Services\TransactionalMailService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 
@@ -13,10 +12,10 @@ class DispatchRiskAlerts extends Command
     protected $signature = 'alerts:dispatch {--weekly : Send weekly watchlist digests}';
     protected $description = 'Dispatch threshold alerts or weekly digests for persisted user preferences';
 
-    public function handle(): int
+    public function handle(TransactionalMailService $mailer): int
     {
         User::with(['preference', 'watchlists.country.riskScores' => fn ($query) => $query->latest()->limit(1)])
-            ->chunkById(100, function ($users): void {
+            ->chunkById(100, function ($users) use ($mailer): void {
                 foreach ($users as $user) {
                     $preference = $user->preference;
                     if (! $preference) continue;
@@ -27,7 +26,7 @@ class DispatchRiskAlerts extends Command
                             $risk = $watchlist->country->riskScores->first();
                             return $risk ? ['country'=>$watchlist->country->name, 'score'=>(float)$risk->total_score, 'status'=>$risk->status] : null;
                         })->filter()->values()->all();
-                        if ($items !== []) $user->notify(new WeeklyRiskDigest($items));
+                        if ($items !== []) $mailer->sendWeeklyDigest($user, $items);
                         continue;
                     }
 
@@ -37,7 +36,7 @@ class DispatchRiskAlerts extends Command
                         if (! $risk || (float)$risk->total_score < $preference->risk_threshold) continue;
                         $key = "risk-alert:{$user->id}:{$watchlist->country_id}:{$risk->id}";
                         if (Cache::add($key, true, now()->addDay())) {
-                            $user->notify(new RiskThresholdAlert($watchlist->country, $risk));
+                            $mailer->sendRiskAlert($user, $watchlist->country, $risk);
                         }
                     }
                 }

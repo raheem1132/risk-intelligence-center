@@ -26,7 +26,7 @@ class SettingsController extends Controller
                 ['name'=>'Open-Meteo Weather','description'=>'Weather and hazard snapshots','ready'=>true,'label'=>'Public API ready'],
                 ['name'=>'Exchange Rate API','description'=>'Global USD conversion feed','ready'=>true,'label'=>'Public API ready'],
                 ['name'=>'Country Data Registry','description'=>'ISO country master data','ready'=>Country::count() >= 200,'label'=>Country::count().' records loaded'],
-                ['name'=>'Email Delivery','description'=>'Password reset, alerts & weekly digest','ready'=>config('mail.default') !== 'log','label'=>config('mail.default') !== 'log'?'Mail transport configured':'SMTP variables required'],
+                ['name'=>'Email Delivery','description'=>'Password reset, alerts & weekly digest','ready'=>filled(config('services.resend.key')),'label'=>filled(config('services.resend.key'))?'Resend HTTPS configured':'RESEND_API_KEY required'],
             ],
             'systemStats' => ['countries'=>Country::count(),'ports'=>Port::count(),'risks'=>RiskScore::count(),'news'=>NewsCache::count()],
         ]);

@@ -7,8 +7,7 @@ use App\Models\User;
 use App\Models\UserPreference;
 use App\Models\RiskScore;
 use App\Models\Watchlist;
-use App\Notifications\RiskThresholdAlert;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -77,7 +76,8 @@ class ProjectRequirementsTest extends TestCase
 
     public function test_threshold_alerts_are_dispatched_for_high_risk_watchlists(): void
     {
-        Notification::fake();
+        config(['services.resend.key'=>'test-key','mail.from.address'=>'onboarding@resend.dev']);
+        Http::fake(['api.resend.com/*'=>Http::response(['id'=>'mail_123'],200)]);
         $user = User::factory()->create();
         $country = Country::create(['name'=>'Indonesia','code_iso2'=>'ID']);
         UserPreference::create(['user_id'=>$user->id,'risk_threshold'=>65,'email_alerts'=>true]);
@@ -88,7 +88,9 @@ class ProjectRequirementsTest extends TestCase
         ]);
 
         $this->artisan('alerts:dispatch')->assertSuccessful();
-        Notification::assertSentTo($user, RiskThresholdAlert::class);
+        Http::assertSent(fn ($request) => $request->url()==='https://api.resend.com/emails'
+            && $request['to']===[$user->email]
+            && str_contains($request['subject'], 'risk alert'));
     }
 
     public function test_country_report_can_render_and_export_csv(): void
