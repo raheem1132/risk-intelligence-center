@@ -44,9 +44,10 @@
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script>
 (async()=>{
-const mapResponse=await fetch('/api/map/ports');
+const mobileMap=window.matchMedia('(max-width: 768px)').matches;
+const mapResponse=await fetch(`/api/map/ports?limit=${mobileMap?1500:15000}`);
 if(!mapResponse.ok)throw new Error('Port map data failed to load');
-const ports=(await mapResponse.json()).data||[];
+const mapPayload=await mapResponse.json(),ports=mapPayload.data||[];
 const map=L.map('map',{zoomControl:false,minZoom:2,worldCopyJump:true}).setView([12,20],2);
 L.control.zoom({position:'bottomright'}).addTo(map);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'OpenStreetMap · CARTO'}).addTo(map);
@@ -63,17 +64,29 @@ ports.forEach(p=>{
 });
 Object.values(countryData).forEach(c=>{const icon=L.divIcon({className:'country-badge',html:`${flag(c.code)} ${c.code||c.name}`});L.marker([c.lat/c.n,c.lng/c.n],{icon,zIndexOffset:1000}).bindTooltip(`${c.name} · ${c.n} ports`,{direction:'top'}).addTo(countries)});
 clusters.addTo(map);countries.addTo(map);L.control.layers(null,{'⚓ Pelabuhan':clusters,'🌍 Negara':countries},{collapsed:false,position:'topright'}).addTo(map);
-portCount.textContent=ports.length.toLocaleString();countryCount.textContent=@json($mapCountryCount).toLocaleString();
+portCount.textContent=(mapPayload.meta?.total||ports.length).toLocaleString();countryCount.textContent=@json($mapCountryCount).toLocaleString();
 const portOptions=document.getElementById('portOptions');
 const portLookup=new Map();
 const portEntries=[];
 ports.forEach((p,index)=>{if(!Number.isFinite(p.lat)||!Number.isFinite(p.lng))return;const label=`${p.name} — ${p.country||p.code||'Unknown'} [${index}]`;portLookup.set(label,p);portEntries.push({label,search:label.toLocaleLowerCase(),port:p})});
-function refreshPortOptions(value=''){
+async function refreshPortOptions(value=''){
  const term=value.trim().toLocaleLowerCase();
- const matches=(term?portEntries.filter(entry=>entry.search.includes(term)):portEntries).slice(0,100);
+ let matches=(term?portEntries.filter(entry=>entry.search.includes(term)):portEntries).slice(0,100);
+ if(term.length>=2){
+  try{
+   const response=await fetch(`/api/ports?q=${encodeURIComponent(value.trim())}&per_page=100`),payload=await response.json();
+   matches=(payload.data||[]).filter(port=>port.latitude!==null&&port.longitude!==null).map(port=>{
+    const mapped={name:port.port_name,country:port.country_name,code:port.country_code,lat:Number(port.latitude),lng:Number(port.longitude),size:port.harbor_size,type:port.harbor_type,wpi:port.wpi_number,source:port.source};
+    const label=`${mapped.name} — ${mapped.country||mapped.code||'Unknown'} [${port.id}]`;
+    portLookup.set(label,mapped);
+    return {label,search:label.toLocaleLowerCase(),port:mapped};
+   });
+  }catch{}
+ }
  portOptions.replaceChildren(...matches.map(entry=>{const option=document.createElement('option');option.value=entry.label;return option}));
 }
-['originPort','destinationPort'].forEach(id=>{const input=document.getElementById(id);input.addEventListener('focus',()=>refreshPortOptions(input.value));input.addEventListener('input',()=>refreshPortOptions(input.value))});
+let portSearchTimer;
+['originPort','destinationPort'].forEach(id=>{const input=document.getElementById(id);input.addEventListener('focus',()=>refreshPortOptions(input.value));input.addEventListener('input',()=>{clearTimeout(portSearchTimer);portSearchTimer=setTimeout(()=>refreshPortOptions(input.value),250)})});
 refreshPortOptions();
 let plannedRoute=L.layerGroup().addTo(map);
 const money=value=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(value);
