@@ -64,7 +64,7 @@ ports.forEach(p=>{
 });
 Object.values(countryData).forEach(c=>{const icon=L.divIcon({className:'country-badge',html:`${flag(c.code)} ${c.code||c.name}`});L.marker([c.lat/c.n,c.lng/c.n],{icon,zIndexOffset:1000}).bindTooltip(`${c.name} · ${c.n} ports`,{direction:'top'}).addTo(countries)});
 clusters.addTo(map);countries.addTo(map);L.control.layers(null,{'⚓ Pelabuhan':clusters,'🌍 Negara':countries},{collapsed:false,position:'topright'}).addTo(map);
-portCount.textContent=(mapPayload.meta?.total||ports.length).toLocaleString();countryCount.textContent=@json($mapCountryCount).toLocaleString();
+portCount.textContent=(mapPayload.meta?.total||ports.length).toLocaleString();countryCount.textContent=Number(@json($mapCountryCount)).toLocaleString();
 const portOptions=document.getElementById('portOptions');
 const portLookup=new Map();
 const portEntries=[];
