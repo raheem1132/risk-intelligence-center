@@ -62,7 +62,7 @@
                     <div class="detail"><span>Inflasi</span><strong>{{ $latestEconomy?->inflation !== null ? number_format($latestEconomy->inflation,2).'%' : '—' }}</strong></div>
                     <div class="detail"><span>Kurs / USD</span><strong>{{ $currencies->last()?->rate ? number_format($currencies->last()->rate,2) : '—' }}</strong></div>
                 </div>
-                <div class="risk-row"><div class="risk-gauge"><div><strong>{{ round($riskScore) }}</strong><span>RISK SCORE</span></div></div><div class="weather-now"><span class="mini-label">Kondisi terbaru</span><p><strong>{{ $weather?->temp !== null ? number_format($weather->temp,1).'°C' : 'Data cuaca —' }}</strong></p><p>Angin {{ $weather?->wind_speed !== null ? number_format($weather->wind_speed,1).' km/j' : '—' }}</p><div class="status">{{ $riskStatus }}</div></div></div>
+                <div class="risk-row"><div class="risk-gauge"><div><strong>{{ round($riskScore) }}</strong><span>RISK SCORE</span></div></div><div class="weather-now"><span class="mini-label">Kondisi terbaru</span><p><strong>{{ $weather?->temperature !== null ? number_format($weather->temperature,1).'°C' : 'Data cuaca —' }}</strong></p><p>Angin {{ $weather?->wind_speed !== null ? number_format($weather->wind_speed,1).' km/j' : '—' }}</p><div class="status">{{ $riskStatus }}</div></div></div>
             @else<div class="empty-state">Sinkronkan negara untuk menampilkan intelligence snapshot.</div>@endif
         </article>
 
