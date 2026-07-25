@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\RiskController;
 use App\Http\Controllers\Api\NewsController;
 use App\Http\Controllers\Api\CurrencyController;
 use App\Http\Controllers\Api\DataController;
+use App\Http\Controllers\Api\MapDataController;
 
 // ==========================================
 // REST API SESUAI SPESIFIKASI PROJECT FINAL
@@ -32,6 +33,7 @@ Route::get('/news', [NewsController::class, 'index']);
 // 5. ENDPOINT CURRENCY (KURS MATA UANG)
 Route::get('/currency', [CurrencyController::class, 'index']);
 Route::get('/overview', [DataController::class, 'overview']);
+Route::get('/map/ports', [MapDataController::class, 'ports']);
 Route::post('/countries/{code}/sync', [DataController::class, 'sync']);
 Route::get('/countries/{code}/economy', [DataController::class, 'economy']);
 Route::post('/countries/{code}/economy/refresh', [DataController::class, 'refreshEconomy']);

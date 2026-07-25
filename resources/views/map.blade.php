@@ -43,7 +43,10 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script>
-const ports=@json($mapPorts);
+(async()=>{
+const mapResponse=await fetch('/api/map/ports');
+if(!mapResponse.ok)throw new Error('Port map data failed to load');
+const ports=(await mapResponse.json()).data||[];
 const map=L.map('map',{zoomControl:false,minZoom:2,worldCopyJump:true}).setView([12,20],2);
 L.control.zoom({position:'bottomright'}).addTo(map);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'OpenStreetMap · CARTO'}).addTo(map);
@@ -60,7 +63,7 @@ ports.forEach(p=>{
 });
 Object.values(countryData).forEach(c=>{const icon=L.divIcon({className:'country-badge',html:`${flag(c.code)} ${c.code||c.name}`});L.marker([c.lat/c.n,c.lng/c.n],{icon,zIndexOffset:1000}).bindTooltip(`${c.name} · ${c.n} ports`,{direction:'top'}).addTo(countries)});
 clusters.addTo(map);countries.addTo(map);L.control.layers(null,{'⚓ Pelabuhan':clusters,'🌍 Negara':countries},{collapsed:false,position:'topright'}).addTo(map);
-portCount.textContent=ports.length.toLocaleString();countryCount.textContent=Object.keys(countryData).length.toLocaleString();
+portCount.textContent=ports.length.toLocaleString();countryCount.textContent=@json($mapCountryCount).toLocaleString();
 const portOptions=document.getElementById('portOptions');
 const portLookup=new Map();
 const portEntries=[];
@@ -119,5 +122,9 @@ map.on('moveend',()=>{if(!aisActive)return;clearTimeout(aisBoundsTimer);aisBound
 setInterval(()=>{const expiry=Date.now()-300000;for(const[mmsi,marker]of vesselMarkers)if(marker.lastSeen<expiry){vesselLayer.removeLayer(marker);vesselMarkers.delete(mmsi)}document.getElementById('vesselCount').textContent=vesselMarkers.size.toLocaleString('id-ID')},30000);
 function toggleFullscreen(){const shell=document.getElementById('mapShell');if(!document.fullscreenElement)shell.requestFullscreen();else document.exitFullscreen()}
 document.addEventListener('fullscreenchange',()=>setTimeout(()=>map.invalidateSize(),150));
+window.togglePlanner=togglePlanner;
+window.calculateRoute=calculateRoute;
+window.toggleFullscreen=toggleFullscreen;
+})().catch(error=>{console.error(error);document.getElementById('portCount').textContent='Error'});
 </script>
 @endsection

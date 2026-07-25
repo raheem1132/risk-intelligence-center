@@ -1,16 +1,17 @@
 import { createServer } from 'node:http';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import WebSocket from 'ws';
 
-const env = Object.fromEntries(
-    readFileSync(new URL('../.env', import.meta.url), 'utf8')
+const envFile = new URL('../.env', import.meta.url);
+const env = existsSync(envFile) ? Object.fromEntries(
+    readFileSync(envFile, 'utf8')
         .split(/\r?\n/)
         .filter(line => line && !line.trimStart().startsWith('#') && line.includes('='))
         .map(line => {
             const separator = line.indexOf('=');
             return [line.slice(0, separator).trim(), line.slice(separator + 1).trim().replace(/^['"]|['"]$/g, '')];
         })
-);
+) : {};
 
 const apiKey = process.env.AISSTREAM_API_KEY || env.AISSTREAM_API_KEY;
 const port = Number(process.env.PORT || process.env.AIS_BRIDGE_PORT || env.AIS_BRIDGE_PORT || 8787);
@@ -51,7 +52,7 @@ const server = createServer((request, response) => {
     const send = payload => response.write(`data: ${JSON.stringify(payload)}\n\n`);
     send({ type: 'status', status: 'connecting' });
 
-    const upstream = new WebSocket('wss://stream.aisstream.io/v0/stream', { rejectUnauthorized: false });
+    const upstream = new WebSocket('wss://stream.aisstream.io/v0/stream');
     upstream.addEventListener('open', () => {
         upstream.send(JSON.stringify({
             APIKey: apiKey,

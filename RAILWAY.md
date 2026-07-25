@@ -46,3 +46,13 @@ AISSTREAM_API_KEY=<your AISStream key>
 ```
 
 Railway supplies `PORT` automatically. The bridge reads it at runtime.
+
+## Scheduler service
+
+Create one more service from the same repository for password/threshold email alerts and weekly digests:
+
+- Start command: `php artisan schedule:work`
+- No public domain required
+- Reuse the same `APP_KEY`, database, cache, mail, and application variables as the App service
+
+Email delivery requires a real mail transport (`MAIL_MAILER=smtp` or a supported provider) plus its credentials. The `log` mailer does not deliver messages.

@@ -26,7 +26,7 @@ class PortalController extends Controller
             'extremeWeather'=>WeatherSnapshot::where('risk_score','>=',65)->distinct('country_id')->count('country_id'),'articles'=>$articles,'sentiments'=>$sentiments,'countries'=>$countries,'selected'=>$selected,
         ]);
     }
-    public function weather(): View { return view('weather',['ports'=>Port::whereNotNull('latitude')->whereNotNull('longitude')->orderBy('port_name')->limit(1000)->get()]); }
+    public function weather(): View { return view('weather',['ports'=>collect()]); }
     public function countries(Request $request): View {
         $query=Country::with(['economicIndicators'=>fn($q)=>$q->latest('year')->limit(1),'riskScores'=>fn($q)=>$q->latest()->limit(1)])
             ->when($request->q,fn($q,$s)=>$q->where('name','like',"%{$s}%"))
@@ -41,8 +41,8 @@ class PortalController extends Controller
     }
     public function map(): View
     {
-        $mapPorts = Port::whereNotNull('latitude')->whereNotNull('longitude')->limit(15000)->get()->map(fn($p) => ['name'=>$p->port_name,'country'=>$p->country_name,'code'=>$p->country_code,'lat'=>(float)$p->latitude,'lng'=>(float)$p->longitude,'size'=>$p->harbor_size,'type'=>$p->harbor_type,'wpi'=>$p->wpi_number,'source'=>$p->source])->values();
-        return view('map', compact('mapPorts'));
+        $mapCountryCount = Country::whereHas('ports')->count();
+        return view('map', compact('mapCountryCount'));
     }
     public function risks(): View
     {

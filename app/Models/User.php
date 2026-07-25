@@ -7,11 +7,23 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    public function preference(): HasOne
+    {
+        return $this->hasOne(UserPreference::class);
+    }
+
+    public function watchlists(): HasMany
+    {
+        return $this->hasMany(Watchlist::class);
+    }
 
     /**
      * The attributes that are mass assignable.

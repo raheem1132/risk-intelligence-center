@@ -7,6 +7,7 @@ use App\Http\Controllers\PortalController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WatchlistController;
+use App\Http\Controllers\PasswordResetController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'login')->name('login');
 Route::view('/register', 'register')->name('register');
+Route::middleware('guest')->group(function () {
+    Route::get('/forgot-password', [PasswordResetController::class, 'request'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'email'])->middleware('throttle:5,1')->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'reset'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'update'])->name('password.update');
+});
 
 Route::post('/register', function (Request $request) {
     $data = $request->validate(['name'=>['required','string','max:255'],'email'=>['required','email','max:255','unique:users,email'],'password'=>['required','string','min:8','confirmed']]);

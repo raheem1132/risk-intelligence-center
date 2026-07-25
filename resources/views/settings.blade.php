@@ -25,4 +25,13 @@
     </div>
 </div>
 <script>document.addEventListener('DOMContentLoaded',()=>{const range=document.getElementById('riskThreshold'),value=document.getElementById('riskValue');range?.addEventListener('input',()=>value.textContent=range.value);const links=[...document.querySelectorAll('.settings-nav a')];links.forEach(link=>link.addEventListener('click',()=>{links.forEach(x=>x.classList.remove('active'));link.classList.add('active')}))});</script>
+@if(session('browser_notification'))
+<script>
+document.addEventListener('DOMContentLoaded',async()=>{
+ if(!('Notification' in window))return;
+ const permission=Notification.permission==='default'?await Notification.requestPermission():Notification.permission;
+ if(permission==='granted')new Notification('SupplyGuard notifications active',{body:'Browser risk alerts are enabled for this device.',icon:'/favicon.ico'});
+});
+</script>
+@endif
 @endsection

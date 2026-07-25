@@ -17,13 +17,16 @@ class SettingsController extends Controller
 {
     public function index(Request $request): View
     {
+        $defaults = ['risk_threshold'=>65,'refresh_interval'=>10,'timezone'=>'Asia/Jakarta','base_currency'=>'USD','density'=>'comfortable','email_alerts'=>true,'browser_alerts'=>false,'weekly_digest'=>true];
+        $stored = $request->user()?->preference?->only(array_keys($defaults)) ?? [];
         return view('settings', [
-            'preferences' => array_merge(['risk_threshold'=>65,'refresh_interval'=>10,'timezone'=>'Asia/Jakarta','base_currency'=>'USD','density'=>'comfortable','email_alerts'=>true,'browser_alerts'=>false,'weekly_digest'=>true], $request->session()->get('preferences', [])),
+            'preferences' => array_merge($defaults, $stored),
             'integrations' => [
                 ['name'=>'GNews Intelligence','description'=>'Realtime news & sentiment','ready'=>filled(config('services.gnews.key')),'label'=>filled(config('services.gnews.key'))?'Configured':'API key required'],
                 ['name'=>'Open-Meteo Weather','description'=>'Weather and hazard snapshots','ready'=>true,'label'=>'Public API ready'],
                 ['name'=>'Exchange Rate API','description'=>'Global USD conversion feed','ready'=>true,'label'=>'Public API ready'],
                 ['name'=>'Country Data Registry','description'=>'ISO country master data','ready'=>Country::count() >= 200,'label'=>Country::count().' records loaded'],
+                ['name'=>'Email Delivery','description'=>'Password reset, alerts & weekly digest','ready'=>config('mail.default') !== 'log','label'=>config('mail.default') !== 'log'?'Mail transport configured':'SMTP variables required'],
             ],
             'systemStats' => ['countries'=>Country::count(),'ports'=>Port::count(),'risks'=>RiskScore::count(),'news'=>NewsCache::count()],
         ]);
@@ -41,8 +44,9 @@ class SettingsController extends Controller
     {
         $data=$request->validate(['risk_threshold'=>['required','integer','between:35,90'],'refresh_interval'=>['required','integer',Rule::in([5,10,15,30,60])],'timezone'=>['required',Rule::in(['Asia/Jakarta','Asia/Singapore','UTC','Europe/London','America/New_York'])],'base_currency'=>['required',Rule::in(['USD','EUR','IDR','SGD','GBP'])],'density'=>['required',Rule::in(['comfortable','compact'])],'email_alerts'=>['nullable','boolean'],'browser_alerts'=>['nullable','boolean'],'weekly_digest'=>['nullable','boolean']]);
         foreach(['email_alerts','browser_alerts','weekly_digest'] as $key)$data[$key]=$request->boolean($key);
-        $request->session()->put('preferences',$data);
-        return back()->with('success','Preferensi operasional berhasil disimpan.');
+        $request->user()->preference()->updateOrCreate([], $data);
+        return back()->with('success','Preferensi operasional berhasil disimpan permanen.')
+            ->with('browser_notification', $data['browser_alerts']);
     }
 
     public function password(Request $request): RedirectResponse

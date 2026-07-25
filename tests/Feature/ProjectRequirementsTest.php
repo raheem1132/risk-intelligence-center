@@ -4,6 +4,11 @@ namespace Tests\Feature;
 
 use App\Models\Country;
 use App\Models\User;
+use App\Models\UserPreference;
+use App\Models\RiskScore;
+use App\Models\Watchlist;
+use App\Notifications\RiskThresholdAlert;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -23,6 +28,7 @@ class ProjectRequirementsTest extends TestCase
         $this->getJson('/api/risk?country=ID')->assertOk()->assertJsonPath('status', 'success');
         $this->getJson('/api/ports')->assertOk()->assertJsonPath('status', 'success');
         $this->getJson('/api/news?country=ID')->assertOk()->assertJsonPath('status', 'success');
+        $this->getJson('/api/map/ports')->assertOk()->assertJsonPath('status', 'success');
     }
 
     public function test_registration_creates_an_account_then_requires_login(): void
@@ -57,8 +63,32 @@ class ProjectRequirementsTest extends TestCase
             'risk_threshold'=>70,'refresh_interval'=>15,'timezone'=>'Asia/Jakarta',
             'base_currency'=>'USD','density'=>'compact','email_alerts'=>1,'weekly_digest'=>1,
         ])->assertRedirect();
-        $this->assertSame(70, session('preferences.risk_threshold'));
-        $this->assertTrue(session('preferences.email_alerts'));
+        $this->assertDatabaseHas('user_preferences', [
+            'user_id'=>$user->id, 'risk_threshold'=>70, 'email_alerts'=>true, 'density'=>'compact',
+        ]);
+        $this->assertTrue(UserPreference::whereBelongsTo($user)->first()->weekly_digest);
+    }
+
+    public function test_password_reset_pages_are_available(): void
+    {
+        $this->get('/forgot-password')->assertOk()->assertSee('Reset password');
+        $this->get('/reset-password/test-token?email=analyst@example.com')->assertOk()->assertSee('Buat password baru');
+    }
+
+    public function test_threshold_alerts_are_dispatched_for_high_risk_watchlists(): void
+    {
+        Notification::fake();
+        $user = User::factory()->create();
+        $country = Country::create(['name'=>'Indonesia','code_iso2'=>'ID']);
+        UserPreference::create(['user_id'=>$user->id,'risk_threshold'=>65,'email_alerts'=>true]);
+        Watchlist::create(['user_id'=>$user->id,'country_id'=>$country->id]);
+        RiskScore::create([
+            'country_id'=>$country->id, 'weather_risk'=>80, 'inflation_risk'=>70,
+            'currency_risk'=>40, 'news_risk'=>75, 'total_score'=>72, 'status'=>'High Risk',
+        ]);
+
+        $this->artisan('alerts:dispatch')->assertSuccessful();
+        Notification::assertSentTo($user, RiskThresholdAlert::class);
     }
 
     public function test_country_report_can_render_and_export_csv(): void

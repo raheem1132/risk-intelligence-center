@@ -88,9 +88,13 @@
             const localMatches = defaultLocations.filter(option =>
                 `${option.dataset.name} ${option.dataset.country}`.toLocaleLowerCase('id').includes(normalizedQuery)
             );
-            const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=100&language=id&format=json`, {signal: searchController.signal});
-            if (!response.ok) throw new Error();
+            const [response, portResponse] = await Promise.all([
+                fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=100&language=id&format=json`, {signal: searchController.signal}),
+                fetch(`/api/ports?q=${encodeURIComponent(query)}&per_page=100`, {signal: searchController.signal}),
+            ]);
+            if (!response.ok || !portResponse.ok) throw new Error();
             const data = await response.json();
+            const portData = await portResponse.json();
             const cities = (data.results || []).filter(place => place.feature_code?.startsWith('PPL')).sort((a,b) => (b.population || 0) - (a.population || 0)).slice(0,50);
             const globalOptions = cities.map(place => {
                 const option = document.createElement('option');
@@ -100,8 +104,16 @@
                 option.textContent = [place.name, place.admin1, place.country].filter(Boolean).join(' — ');
                 return option;
             });
+            const portOptions = (portData.data || []).map(port => {
+                const option = document.createElement('option');
+                option.value = `${port.latitude},${port.longitude}`;
+                option.dataset.name = port.port_name;
+                option.dataset.country = port.country_name || port.country_code || '';
+                option.textContent = `${port.port_name} — ${option.dataset.country}`;
+                return option;
+            });
             const seen = new Set();
-            const options = [...localMatches.map(option => option.cloneNode(true)), ...globalOptions]
+            const options = [...localMatches.map(option => option.cloneNode(true)), ...portOptions, ...globalOptions]
                 .filter(option => {
                     const key = `${option.dataset.name}|${option.dataset.country}`.toLocaleLowerCase('id');
                     if (seen.has(key)) return false;
