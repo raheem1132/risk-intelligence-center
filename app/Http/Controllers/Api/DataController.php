@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Country;
 use App\Services\GlobalDataService;
 use Illuminate\Http\JsonResponse;
+use RuntimeException;
 
 class DataController extends Controller
 {
@@ -15,7 +16,14 @@ class DataController extends Controller
     public function refreshEconomy(string $code, GlobalDataService $service): JsonResponse
     {
         $country = $this->country($code);
-        $data = $service->economy($country);
+        try {
+            $data = $service->economy($country);
+        } catch (RuntimeException $exception) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $exception->getMessage(),
+            ], 503);
+        }
 
         return response()->json([
             'status' => 'success',

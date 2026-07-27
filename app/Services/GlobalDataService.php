@@ -8,6 +8,9 @@ use App\Models\EconomicIndicator;
 use App\Models\WeatherSnapshot;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Http\Client\Pool;
+use Illuminate\Http\Client\Response;
+use RuntimeException;
 
 class GlobalDataService
 {
@@ -42,17 +45,59 @@ class GlobalDataService
 
     public function economy(Country $country, bool $bulk = false): array
     {
-        $from = now()->year - 9; $to = now()->year;
+        $from = now()->year - 9;
+        $to = now()->year;
         $indicators = ['NY.GDP.MKTP.CD'=>'gdp','FP.CPI.TOTL.ZG'=>'inflation','SP.POP.TOTL'=>'population'];
         $years = [];
-        foreach ($indicators as $indicator => $field) {
-            try {
-                $request = Http::withoutVerifying()->timeout($bulk ? 5 : 12);
-                if (!$bulk) $request->retry(2, 200);
-                $response = $request->get("https://api.worldbank.org/v2/country/{$country->code_iso2}/indicator/{$indicator}", ['format'=>'json','date'=>"{$from}:{$to}",'per_page'=>20]);
-                foreach (($response->json()[1] ?? []) as $row) if ($row['value'] !== null) $years[(int)$row['date']][$field] = $row['value'];
-            } catch (\Throwable) {}
+
+        try {
+            $responses = Http::pool(function (Pool $pool) use ($bulk, $country, $from, $to, $indicators) {
+                $requests = [];
+                foreach ($indicators as $indicator => $field) {
+                    $request = $pool->as($field)
+                        ->withoutVerifying()
+                        ->connectTimeout(4)
+                        ->timeout($bulk ? 6 : 10);
+
+                    if (! $bulk) {
+                        $request->retry(1, 200, throw: false);
+                    }
+
+                    $requests[] = $request->get(
+                        "https://api.worldbank.org/v2/country/{$country->code_iso2}/indicator/{$indicator}",
+                        ['format'=>'json','date'=>"{$from}:{$to}",'per_page'=>20]
+                    );
+                }
+
+                return $requests;
+            });
+        } catch (\Throwable $exception) {
+            report($exception);
+            if (! $bulk) {
+                throw new RuntimeException('Koneksi ke World Bank gagal. Silakan coba kembali beberapa saat lagi.', previous: $exception);
+            }
+            $responses = [];
         }
+
+        $successful = 0;
+        foreach ($indicators as $field) {
+            $response = $responses[$field] ?? null;
+            if (! $response instanceof Response || ! $response->successful()) {
+                continue;
+            }
+
+            $successful++;
+            foreach (($response->json()[1] ?? []) as $row) {
+                if ($row['value'] !== null) {
+                    $years[(int) $row['date']][$field] = $row['value'];
+                }
+            }
+        }
+
+        if (! $bulk && $successful === 0) {
+            throw new RuntimeException('World Bank belum memberikan respons yang valid. Silakan coba kembali beberapa saat lagi.');
+        }
+
         foreach ($years as $year => $values) EconomicIndicator::updateOrCreate(['country_id'=>$country->id,'year'=>$year], $values);
         if ($latest = EconomicIndicator::where('country_id',$country->id)->latest('year')->first()) $country->update(['gdp'=>$latest->gdp,'inflation_rate'=>$latest->inflation,'population'=>$latest->population]);
         return EconomicIndicator::where('country_id',$country->id)->orderBy('year')->get()->toArray();

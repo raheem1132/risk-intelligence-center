@@ -29,26 +29,39 @@ document.getElementById('economySyncButton').addEventListener('click', async () 
     apiState.classList.remove('error');
     apiState.classList.add('loading');
     apiState.querySelector('span').textContent = 'Synchronizing live data';
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
     try {
         const response = await fetch(`/api/countries/${country.value}/economy/refresh`, {
             method: 'POST',
-            headers: {'Accept': 'application/json'}
+            headers: {'Accept': 'application/json'},
+            signal: controller.signal
         });
-        if (!response.ok) throw new Error();
         const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'World Bank tidak dapat dihubungi.');
         const latest = result.data?.at(-1);
         status.textContent = latest ? `Berhasil diperbarui · data terbaru tahun ${latest.year}` : 'Sinkronisasi selesai, tetapi provider belum mengirim data.';
         apiState.classList.remove('loading');
         apiState.querySelector('span').textContent = 'Data updated successfully';
         setTimeout(() => location.reload(), 900);
-    } catch {
-        status.textContent = 'World Bank tidak dapat dihubungi. Silakan coba lagi.';
+    } catch (error) {
+        const message = error.name === 'AbortError'
+            ? 'Sinkronisasi melewati batas 30 detik. Silakan coba kembali.'
+            : error.message;
+        status.textContent = message;
         apiState.classList.remove('loading');
         apiState.classList.add('error');
         apiState.querySelector('span').textContent = 'Data connection failed';
         button.disabled = false;
         button.textContent = '↻ Coba lagi';
+    } finally {
+        clearTimeout(timeout);
     }
+});
+document.getElementById('liveCountry').addEventListener('change', event => {
+    const status = document.getElementById('economySyncStatus');
+    const selected = event.target.options[event.target.selectedIndex].text;
+    status.textContent = `Siap mengambil publikasi ekonomi terbaru untuk ${selected}.`;
 });
 </script>
 @endsection
